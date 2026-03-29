@@ -1,0 +1,33 @@
+{
+  "name": "Template: Estudos & Vida Pessoal",
+  "desc": "Organização de fluxo de estudos e tarefas diárias.",
+  "lists": [
+    { "name": "💡 Inbox / Ideias" },
+    { "name": "📚 Backlog de Estudos" },
+    { "name": "⏳ Para Fazer (Semana)" },
+    { "name": "🚀 Em Andamento (Foco)" },
+    { "name": "✅ Concluído" },
+    { "name": "📎 Recursos e Links" }
+  ],
+  "labels": [
+    { "name": "Urgente", "color": "red" },
+    { "name": "Estudo: Teoria", "color": "blue" },
+    { "name": "Estudo: Prática", "color": "green" },
+    { "name": "Pessoal", "color": "purple" },
+    { "name": "Revisão", "color": "yellow" }
+  ],
+  "cards": [
+    {
+      "name": "Exemplo: Estudar Lógica de Programação",
+      "desc": "Focar em estruturas de repetição e condicionais.",
+      "idList": 1,
+      "labels": ["Estudo: Teoria", "Estudo: Prática"]
+    },
+    {
+      "name": "Tarefa Pessoal: Organizar finanças",
+      "desc": "Checar extratos e pagar contas do mês.",
+      "idList": 2,
+      "labels": ["Pessoal", "Urgente"]
+    }
+  ]
+}
