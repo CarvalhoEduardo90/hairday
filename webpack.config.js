@@ -11,6 +11,7 @@ module.exports = {
     entry: {
         main: path.resolve(__dirname, "src", "main.js"),
         login: path.resolve(__dirname, "src", "login.js"),
+        criarSenha: path.resolve(__dirname, "src", "criar-senha.js"),
         admin: path.resolve(__dirname, "src", "admin.js"),
         conta: path.resolve(__dirname, "src", "conta.js"),
         clientes: path.resolve(__dirname, "src", "clientes.js"),
@@ -28,6 +29,11 @@ module.exports = {
         port: 3000,
         open: true,
         liveReload: true,
+        historyApiFallback: {
+            rewrites: [
+                { from: /^\/criar-senha\/?$/, to: "/criar-senha.html" },
+            ],
+        },
     },
 
     plugins: [
@@ -57,6 +63,12 @@ module.exports = {
             template: path.resolve(__dirname, "login.html"),
             filename: "login.html",
             chunks: ["login"],
+        }),
+
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "criar-senha.html"),
+            filename: "criar-senha.html",
+            chunks: ["criarSenha"],
         }),
 
         new HtmlWebpackPlugin({

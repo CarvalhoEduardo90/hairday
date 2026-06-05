@@ -72,6 +72,17 @@ async function loadClients() {
     render(clients)
 }
 
+function setButtonLoading(button, loading, label) {
+    button.disabled = loading
+    if (loading) {
+        button.dataset.originalText = button.textContent
+        button.textContent = label
+    } else if (button.dataset.originalText) {
+        button.textContent = button.dataset.originalText
+        delete button.dataset.originalText
+    }
+}
+
 function render(clients) {
     list.innerHTML = ""
 
@@ -110,9 +121,9 @@ function render(clients) {
         button.type = "button"
 
         if (!client.hasAccount) {
-            // Sem conta não pode ser assinante.
-            button.textContent = "Sem conta"
-            button.disabled = true
+            // Primeiro envia o convite; depois a conta pode ser marcada como assinante.
+            button.textContent = "Enviar convite"
+            button.addEventListener("click", () => invite(client, button))
         } else if (client.isSubscriber) {
             button.textContent = "Remover assinante"
             button.addEventListener("click", () => toggle(client, false))
@@ -197,6 +208,24 @@ async function toggle(client, isSubscriber) {
         return alert(data.error || "Não foi possível atualizar o cliente.")
     }
 
+    await loadClients()
+}
+
+async function invite(client, button) {
+    setButtonLoading(button, true, "Enviando...")
+
+    const response = await authFetch("/admin/clients/invite", {
+        method: "POST",
+        body: JSON.stringify({ clientId: client.id }),
+    })
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        setButtonLoading(button, false)
+        return alert(data.error || "Nao foi possivel enviar o convite.")
+    }
+
+    alert(`Convite enviado para ${client.email}.`)
     await loadClients()
 }
 
