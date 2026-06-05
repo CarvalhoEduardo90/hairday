@@ -98,6 +98,28 @@
         padding: 0;
       }
 
+      /* Checkbox de aceite (modo cadastro). */
+      .accept {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+        color: #b2afb6;
+        line-height: 1.5;
+        margin-top: 1rem;
+      }
+      .accept input {
+        margin-top: 0.15rem;
+        width: 1rem;
+        height: 1rem;
+        accent-color: #b8952e;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+      .accept label {
+        cursor: pointer;
+      }
+
       /* Card de benefícios (lado direito, só desktop). */
       .auth-side {
         background-color: #232225;
@@ -280,16 +302,30 @@
             <button type="submit" class="button" id="submit-button">Entrar</button>
           </form>
 
-          <p class="legal-text">
+          <p class="legal-text signin-only">
             Ao continuar, você concorda com a
-            <button type="button" class="legal-link" id="open-privacy">
+            <button type="button" class="legal-link" data-doc="privacy">
               Política de Privacidade</button
             >
             e os
-            <button type="button" class="legal-link" id="open-terms">
+            <button type="button" class="legal-link" data-doc="terms">
               Termos de Uso</button
             >.
           </p>
+
+          <div class="accept signup-only" data-display="flex">
+            <input type="checkbox" id="accept-terms" />
+            <label for="accept-terms">
+              Li e aceito a
+              <button type="button" class="legal-link" data-doc="privacy">
+                Política de Privacidade</button
+              >
+              e os
+              <button type="button" class="legal-link" data-doc="terms">
+                Termos de Uso</button
+              >.
+            </label>
+          </div>
 
           <p
             class="subtitle"

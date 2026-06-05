@@ -152,7 +152,8 @@ async function run() {
                 console.log("ok:", f2)
 
                 // Variante: modal da Política de Privacidade aberto.
-                await page.click("#open-privacy")
+                // (clica no link visível dentro do checkbox de aceite)
+                await page.click('.accept .legal-link[data-doc="privacy"]')
                 await page.waitForTimeout(300)
                 const f3 = path.join(OUT, `login-modal-${vpName}.png`)
                 await page.screenshot({ path: f3, fullPage: true })

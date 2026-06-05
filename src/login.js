@@ -20,14 +20,23 @@ const subtitle = document.getElementById("form-subtitle")
 const toggleText = document.getElementById("toggle-text")
 const toggleLink = document.getElementById("toggle-mode")
 const signupFields = document.querySelectorAll(".signup-only")
+const signinFields = document.querySelectorAll(".signin-only")
+const acceptCheckbox = document.getElementById("accept-terms")
 
 // "signin" ou "signup"
 let mode = "signin"
 
 function applyMode() {
-    // Mostra os campos de nome/telefone apenas no cadastro.
+    // Alterna o que aparece em cada modo:
+    // - signup-only: nome, telefone e o checkbox de aceite (só no cadastro)
+    // - signin-only: o texto de aceite implícito (só no login)
     signupFields.forEach((el) => {
-        el.style.display = mode === "signup" ? "block" : "none"
+        // data-display permite que o checkbox use "flex" e os campos "block".
+        el.style.display =
+            mode === "signup" ? el.dataset.display || "block" : "none"
+    })
+    signinFields.forEach((el) => {
+        el.style.display = mode === "signin" ? "block" : "none"
     })
 
     if (mode === "signin") {
@@ -69,12 +78,15 @@ function closeModal() {
     modal.hidden = true
 }
 
-document
-    .getElementById("open-privacy")
-    .addEventListener("click", () => openModal(privacyPolicy))
-document
-    .getElementById("open-terms")
-    .addEventListener("click", () => openModal(termsOfUse))
+// Cada link legal (.legal-link) abre o documento indicado em data-doc.
+// stopPropagation evita marcar o checkbox quando o link está dentro do label.
+document.querySelectorAll(".legal-link").forEach((btn) => {
+    btn.addEventListener("click", (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        openModal(btn.dataset.doc === "terms" ? termsOfUse : privacyPolicy)
+    })
+})
 
 modalClose.addEventListener("click", closeModal)
 // Fecha ao clicar no fundo (fora do card).
@@ -131,6 +143,11 @@ form.onsubmit = async (event) => {
             }
             if (!isValidPhone(phone)) {
                 throw new Error("Informe um telefone válido (10 ou 11 dígitos).")
+            }
+            if (!acceptCheckbox.checked) {
+                throw new Error(
+                    "É necessário aceitar a Política de Privacidade e os Termos de Uso."
+                )
             }
 
             const { data, error } = await supabase.auth.signUp({
