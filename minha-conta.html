@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="./src/assets/scissors.svg" />
+    <title>Hair Day — Minha conta</title>
+
+    <style>
+      .account {
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
+      .account-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+      .account-top img.logo-img {
+        height: 2.5rem;
+      }
+      .account-actions {
+        display: flex;
+        gap: 0.75rem;
+      }
+      .btn-outline {
+        background: none;
+        border: 1px solid #2e2c30;
+        color: #f5f4f5;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-family: inherit;
+        text-decoration: none;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+      }
+      .btn-outline:hover {
+        background-color: #2e2c30;
+      }
+      .account h1 {
+        font-size: 1.5rem;
+      }
+      .account .subtitle {
+        color: #98959d;
+        font-size: 0.87rem;
+        margin-bottom: 1.5rem;
+      }
+      .appointments {
+        list-style: none;
+      }
+      .appointments li {
+        border: 1px solid #2e2c30;
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .appointments li .when {
+        flex: 1;
+        font-weight: 700;
+      }
+      .appointments li button {
+        background: none;
+        border: none;
+        color: #b8952e;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.87rem;
+        text-decoration: underline;
+      }
+      .empty {
+        color: #98959d;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="account">
+      <div class="account-top">
+        <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+        <div class="account-actions">
+          <a href="index.html" class="btn-outline">Agendar novo</a>
+          <button id="logout" class="btn-outline">Sair</button>
+        </div>
+      </div>
+
+      <h1>Meus agendamentos</h1>
+      <p class="subtitle" id="account-email">&nbsp;</p>
+
+      <ul class="appointments" id="appointments"></ul>
+    </main>
+  </body>
+</html>

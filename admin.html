@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="./src/assets/scissors.svg" />
+    <title>Hair Day — Painel</title>
+
+    <style>
+      .admin {
+        max-width: 50rem;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
+      .admin-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+      }
+      .admin-top img.logo-img {
+        height: 2.5rem;
+      }
+      .admin-logout {
+        background: none;
+        border: 1px solid #2e2c30;
+        color: #f5f4f5;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .admin-logout:hover {
+        background-color: #2e2c30;
+      }
+      .admin-controls {
+        margin-bottom: 1.5rem;
+        max-width: 16rem;
+      }
+      .schedule-period ul li .item-name {
+        flex: 1;
+      }
+      .item-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .item-actions button {
+        background: none;
+        border: none;
+        color: #b8952e;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.87rem;
+        text-decoration: underline;
+      }
+      .empty {
+        color: #98959d;
+        font-size: 0.87rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="admin">
+      <div class="admin-top">
+        <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+        <button id="logout" class="admin-logout">Sair</button>
+      </div>
+
+      <header style="margin-bottom: 1.5rem">
+        <h1>Agendamentos</h1>
+        <p style="color: #98959d; font-size: 0.87rem">
+          Gerencie os agendamentos do dia selecionado
+        </p>
+      </header>
+
+      <div class="admin-controls">
+        <label for="date" class="label">Data</label>
+        <div class="input">
+          <i><img src="./src/assets/calendar.svg" alt="Calendário" /></i>
+          <input type="date" id="date" name="date" required />
+        </div>
+      </div>
+
+      <section class="schedule-period">
+        <header>
+          <img src="./src/assets/morning.svg" alt="Manhã" />
+          <strong>Manhã</strong>
+          <span>09h-12h</span>
+        </header>
+        <ul id="period-morning" class="period"></ul>
+      </section>
+
+      <section class="schedule-period">
+        <header>
+          <img src="./src/assets/afternoon.svg" alt="Tarde" />
+          <strong>Tarde</strong>
+          <span>13h-18h</span>
+        </header>
+        <ul id="period-afternoon" class="period"></ul>
+      </section>
+
+      <section class="schedule-period">
+        <header>
+          <img src="./src/assets/night.svg" alt="Noite" />
+          <strong>Noite</strong>
+          <span>19h-21h</span>
+        </header>
+        <ul id="period-night" class="period"></ul>
+      </section>
+    </main>
+  </body>
+</html>

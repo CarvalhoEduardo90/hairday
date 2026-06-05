@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +16,24 @@
     <title>Hair Day</title>
   </head>
   <body>
+    <a
+      href="login.html"
+      style="
+        position: absolute;
+        top: 0.75rem;
+        right: 1rem;
+        z-index: 1;
+        color: #f5f4f5;
+        text-decoration: none;
+        border: 1px solid #2e2c30;
+        background-color: #2e2c30;
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      "
+      >Entrar / Minha conta</a
+    >
+
     <div class="container">
       <img src="./src/assets/logo.svg" alt="Logo" class="logo" />
 
@@ -100,14 +118,41 @@
           </li> -->
         </ul>
 
-        <label for="client" class="label">Cliente</label>
+        <label for="client" class="label">Nome completo</label>
         <div class="input">
-          <i><img src="./src/assets/person.svg" alt="Calendário" /></i>
+          <i><img src="./src/assets/person.svg" alt="Cliente" /></i>
           <input
             type="text"
             id="client"
             name="client"
-            placeholder="Nome do cliente"
+            placeholder="Nome completo do cliente"
+            autocomplete="name"
+            required
+          />
+        </div>
+
+        <label for="email" class="label">E-mail</label>
+        <div class="input">
+          <i><img src="./src/assets/person.svg" alt="E-mail" /></i>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="email@exemplo.com"
+            autocomplete="email"
+            required
+          />
+        </div>
+
+        <label for="phone" class="label">Contato</label>
+        <div class="input">
+          <i><img src="./src/assets/person.svg" alt="Telefone" /></i>
+          <input
+            type="tel"
+            id="phone"
+            name="phone"
+            placeholder="(00) 00000-0000"
+            autocomplete="tel"
             required
           />
         </div>

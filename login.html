@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="icon" href="./src/assets/scissors.svg" />
+    <title>Hair Day — Entrar</title>
+
+    <style>
+      .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+      }
+      .login-card {
+        width: 100%;
+        max-width: 22rem;
+        background-color: #2e2c30;
+        border-radius: 0.75rem;
+        padding: 2rem;
+      }
+      .login-card img.logo-img {
+        height: 2.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .login-card h1 {
+        font-size: 1.25rem;
+        margin-bottom: 0.25rem;
+      }
+      .login-card p.subtitle {
+        color: #98959d;
+        font-size: 0.87rem;
+        margin-bottom: 1.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-wrapper">
+      <div class="login-card">
+        <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+        <h1 id="form-title">Entrar</h1>
+        <p class="subtitle" id="form-subtitle">
+          Acesse para gerenciar seus agendamentos
+        </p>
+
+        <form class="form" id="login-form">
+          <label for="email" class="label">E-mail</label>
+          <div class="input">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="email@exemplo.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+
+          <label for="password" class="label">Senha</label>
+          <div class="input">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Sua senha"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit" class="button" id="submit-button">Entrar</button>
+        </form>
+
+        <p
+          class="subtitle"
+          style="margin-top: 1rem; margin-bottom: 0; text-align: center"
+        >
+          <span id="toggle-text">Não tem conta?</span>
+          <a
+            id="toggle-mode"
+            href="#"
+            style="color: #b8952e; cursor: pointer; font-weight: 700"
+            >Criar conta</a
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

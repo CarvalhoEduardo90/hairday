@@ -4,38 +4,26 @@ const periodMorning = document.getElementById("period-morning")
 const periodAfternoon = document.getElementById("period-afternoon")
 const periodNight = document.getElementById("period-night")
 
+// Página PÚBLICA: exibe apenas a disponibilidade (horário "Ocupado"),
+// sem nome do cliente nem opção de cancelar. A API pública retorna só { when }.
 export function schedulesShow({ dailySchedules }) {
     try {
-        // Limpa as listas.
         periodMorning.innerHTML = ""
         periodAfternoon.innerHTML = ""
         periodNight.innerHTML = ""
 
-        // Renderiza os agendamentos por periodo.
         dailySchedules.forEach((schedule) => {
             const item = document.createElement("li")
             const time = document.createElement("strong")
-            const name = document.createElement("span")
-
-            // Adiciona o id do agendamento.
-            item.setAttribute("data-id", schedule.id)
+            const label = document.createElement("span")
 
             time.textContent = dayjs(schedule.when).format("HH:mm")
-            name.textContent = schedule.name
+            label.textContent = "Ocupado"
 
-            // Cria icone de cancelar o agendamento.
-            const cancelIcon = document.createElement("img")
-            cancelIcon.classList.add("cancel-icon")
-            cancelIcon.setAttribute("src", "./src/assets/cancel.svg")
-            cancelIcon.setAttribute("alt", "Cancelar")
+            item.append(time, label)
 
-            // Adiciona o tempo, nome e icone no item.
-            item.append(time, name, cancelIcon)
-
-            // Obtem a hora do agendamento para definir o periodo.
             const hour = dayjs(schedule.when).hour()
 
-            // Renderiza o agendamento na sessão(manhã, tarde ou noite) correspondente.
             if (hour <= 12) {
                 periodMorning.appendChild(item)
             } else if (hour > 12 && hour <= 18) {
@@ -46,6 +34,6 @@ export function schedulesShow({ dailySchedules }) {
         })
     } catch (error) {
         console.log(error)
-        alert("Não foi possível carregar os horários ocupados. Tente novamente mais tarde.")       
+        alert("Não foi possível carregar os horários ocupados. Tente novamente mais tarde.")
     }
 }

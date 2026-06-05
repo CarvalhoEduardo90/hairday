@@ -5,11 +5,12 @@
   "scripts": {
     "build": "webpack",
     "dev": "webpack serve",
-    "server": "json-server --watch server.json --port 3333"
+    "dev:api": "vercel dev"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
     "dayjs": "^1.11.10",
-    "json-server": "^1.0.0-alpha.21"
+    "resend": "^4.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.23.7",

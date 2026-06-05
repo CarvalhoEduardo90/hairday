@@ -46,8 +46,10 @@ export function hoursLoad({ date, dailySchedules }) {
 
         li.textContent = hour
         hours.append(li)
-        hoursClick()
     })
+
+    // Registra os eventos de clique uma única vez, após renderizar todos os horários.
+    hoursClick()
 }
 function hourHeaderAdd(title) {
     const header = document.createElement("li")

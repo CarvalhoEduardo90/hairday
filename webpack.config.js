@@ -1,4 +1,5 @@
 const path = require("path");
+const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopywebpackPlugin = require("copy-webpack-plugin");
 
@@ -7,10 +8,16 @@ module.exports = {
     mode: "development",
 
 
-    entry: path.resolve(__dirname, "src", "main.js"),
+    entry: {
+        main: path.resolve(__dirname, "src", "main.js"),
+        login: path.resolve(__dirname, "src", "login.js"),
+        admin: path.resolve(__dirname, "src", "admin.js"),
+        conta: path.resolve(__dirname, "src", "conta.js"),
+    },
     output: {
-        filename: "main.js",
+        filename: "[name].js",
         path: path.resolve(__dirname, "dist"),
+        clean: true,
     },
 
     devServer: {
@@ -23,9 +30,44 @@ module.exports = {
     },
 
     plugins: [
+        // Injeta variáveis públicas no bundle.
+        // API_BASE_URL padrão "/api" (mesma origem na Vercel).
+        // SUPABASE_ANON_KEY é pública por design (protegida por RLS no banco).
+        new webpack.DefinePlugin({
+            "process.env.API_BASE_URL": JSON.stringify(
+                process.env.API_BASE_URL || "/api"
+            ),
+            "process.env.SUPABASE_URL": JSON.stringify(
+                process.env.SUPABASE_URL || ""
+            ),
+            "process.env.SUPABASE_ANON_KEY": JSON.stringify(
+                process.env.SUPABASE_ANON_KEY || ""
+            ),
+        }),
+
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, "index.html"),
+            filename: "index.html",
+            chunks: ["main"],
             favicon: path.resolve(__dirname, "src", "assets", "scissors.svg"),
+        }),
+
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "login.html"),
+            filename: "login.html",
+            chunks: ["login"],
+        }),
+
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "admin.html"),
+            filename: "admin.html",
+            chunks: ["admin"],
+        }),
+
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "minha-conta.html"),
+            filename: "minha-conta.html",
+            chunks: ["conta"],
         }),
 
         new CopywebpackPlugin({

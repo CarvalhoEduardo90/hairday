@@ -1,20 +1,20 @@
-import {apiConfig} from "./api-config.js"
+import { apiConfig } from "./api-config.js"
 
-export async function scheduleNew({ id, name, when }) {
-    try {
-        // Realiza a requisição para enviar os dados do novo agendamento.
-        await fetch(`${apiConfig.baseURL}/schedules`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id, name, when }),
-        })
+export async function scheduleNew({ name, email, phone, when }) {
+    // Realiza a requisição para criar o agendamento.
+    const response = await fetch(`${apiConfig.baseURL}/appointments`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ fullName: name, email, phone, when }),
+    })
 
-        // Exibe uma mensagem de sucesso para o usuário.
-        alert("Agendamento realizado com sucesso!")
-    } catch (error) {
-        console.log(error)
-        alert("Não foi possível agendar o horário. Tente novamente mais tarde.")        
+    // Garante que a API confirmou o agendamento antes de prosseguir.
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || `Erro ao agendar. Status: ${response.status}`)
     }
+
+    return response.json()
 }
