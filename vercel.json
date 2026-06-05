@@ -3,6 +3,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": null,
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/criar-senha",
+      "destination": "/criar-senha.html"
+    }
+  ],
   "functions": {
     "api/**/*.js": {
       "maxDuration": 10

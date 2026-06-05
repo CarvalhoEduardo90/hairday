@@ -89,6 +89,17 @@ vercel dev             # sobe front + /api juntos em http://localhost:3000
    e-mail do `ADMIN_EMAILS` e uma senha. Marque para confirmar o e-mail.
 4. (Recomendado) Em **Authentication → Providers → Email**, ajuste se quer ou
    não exigir confirmação de e-mail para novos cadastros (relevante na Fase 3b).
+5. Em **Authentication → URL Configuration**, configure o **Site URL** com o
+   domínio de produção e adicione estes redirects permitidos:
+   - `https://SEU-DOMINIO.com/**`
+   - `https://SEU-DOMINIO.com/criar-senha`
+   - `http://localhost:3000/**`
+   - `http://localhost:5173/**`
+
+Convites de clientes sem conta são enviados pelo painel `/clientes.html`. A API
+`POST /api/admin/clients/invite` chama `supabase.auth.admin.inviteUserByEmail`
+somente no back-end, usando `redirectTo` para `/criar-senha`. A chave
+`SUPABASE_SERVICE_ROLE_KEY` continua exclusiva das Serverless Functions.
 
 ### 7. (Opcional) WhatsApp via Z-API
 O sistema funciona **sem** WhatsApp; configure quando quiser ativá-lo.
@@ -127,6 +138,7 @@ Observações:
 |---|---|---|
 | `/` (`index.html`) | Público | Agendar + ver disponibilidade (sem nomes) |
 | `/login.html` | Todos | Login e cadastro (e-mail + senha) + Política/Termos em modal |
+| `/criar-senha` (`criar-senha.html`) | Convidado | Aceite de convite Supabase Auth e definição da primeira senha |
 | `/admin.html` | Admin | Painel: ver/cancelar/remarcar todos os agendamentos (com etiqueta de categoria) |
 | `/clientes.html` | Admin | Gestão de clientes: marcar/desmarcar assinante |
 | `/minha-conta.html` | Cliente | Ver/cancelar/remarcar os próprios agendamentos |
