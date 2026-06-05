@@ -51,6 +51,10 @@
         display: block;
         margin-bottom: 0.5rem;
       }
+      /* Campos exibidos apenas no modo "Criar conta". */
+      .signup-only {
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -63,6 +67,19 @@
         </p>
 
         <form id="login-form">
+          <div class="signup-only">
+            <label for="fullname" class="label">Nome completo</label>
+            <div class="input">
+              <input
+                type="text"
+                id="fullname"
+                name="fullname"
+                placeholder="Seu nome completo"
+                autocomplete="name"
+              />
+            </div>
+          </div>
+
           <label for="email" class="label">E-mail</label>
           <div class="input">
             <input
@@ -73,6 +90,19 @@
               autocomplete="email"
               required
             />
+          </div>
+
+          <div class="signup-only">
+            <label for="phone" class="label">Contato</label>
+            <div class="input">
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                placeholder="(00) 00000-0000"
+                autocomplete="tel"
+              />
+            </div>
           </div>
 
           <label for="password" class="label">Senha</label>

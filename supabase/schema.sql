@@ -49,3 +49,34 @@ create index if not exists appointments_when_idx
 -- ============================================================
 alter table public.clients      enable row level security;
 alter table public.appointments enable row level security;
+
+-- ============================================================
+-- Ao criar uma conta (sign-up), cria/atualiza o registro de cliente
+-- a partir dos metadados (full_name, phone) enviados pelo front.
+-- Assim o cliente já aparece na lista do admin mesmo sem ter agendado.
+-- Idempotente: pode rodar de novo sem erro.
+-- ============================================================
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.clients (full_name, email, phone)
+  values (
+    coalesce(new.raw_user_meta_data->>'full_name', ''),
+    new.email,
+    coalesce(new.raw_user_meta_data->>'phone', '')
+  )
+  on conflict (email) do update set
+    full_name = coalesce(nullif(excluded.full_name, ''), public.clients.full_name),
+    phone     = coalesce(nullif(excluded.phone, ''), public.clients.phone);
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();

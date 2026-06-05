@@ -142,6 +142,16 @@ async function run() {
             const file = path.join(OUT, `${p.name}-${vpName}.png`)
             await page.screenshot({ path: file, fullPage: true })
             console.log("ok:", file)
+
+            // Variante: tela de login no modo "Criar conta".
+            if (p.name === "login") {
+                await page.click("#toggle-mode")
+                await page.waitForTimeout(300)
+                const f2 = path.join(OUT, `login-signup-${vpName}.png`)
+                await page.screenshot({ path: f2, fullPage: true })
+                console.log("ok:", f2)
+            }
+
             await context.close()
         }
     }

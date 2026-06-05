@@ -6,20 +6,29 @@ import "./styles/form.css"
 
 import { supabase, getAccessToken } from "./libs/supabase-client.js"
 import { apiConfig } from "./services/api-config.js"
+import { isValidEmail, isValidPhone } from "./utils/validation.js"
 
 const form = document.getElementById("login-form")
+const fullnameInput = document.getElementById("fullname")
 const emailInput = document.getElementById("email")
+const phoneInput = document.getElementById("phone")
 const passwordInput = document.getElementById("password")
 const button = document.getElementById("submit-button")
 const title = document.getElementById("form-title")
 const subtitle = document.getElementById("form-subtitle")
 const toggleText = document.getElementById("toggle-text")
 const toggleLink = document.getElementById("toggle-mode")
+const signupFields = document.querySelectorAll(".signup-only")
 
 // "signin" ou "signup"
 let mode = "signin"
 
 function applyMode() {
+    // Mostra os campos de nome/telefone apenas no cadastro.
+    signupFields.forEach((el) => {
+        el.style.display = mode === "signup" ? "block" : "none"
+    })
+
     if (mode === "signin") {
         title.textContent = "Entrar"
         subtitle.textContent = "Acesse para gerenciar seus agendamentos"
@@ -76,9 +85,25 @@ form.onsubmit = async (event) => {
             if (error) throw new Error("E-mail ou senha inválidos.")
             await redirectByRole()
         } else {
+            // Cadastro: valida nome e telefone (além de e-mail/senha).
+            const fullName = fullnameInput.value.trim()
+            const phone = phoneInput.value.trim()
+
+            if (!fullName) {
+                throw new Error("Informe seu nome completo.")
+            }
+            if (!isValidEmail(email)) {
+                throw new Error("Informe um e-mail válido.")
+            }
+            if (!isValidPhone(phone)) {
+                throw new Error("Informe um telefone válido (10 ou 11 dígitos).")
+            }
+
             const { data, error } = await supabase.auth.signUp({
                 email,
                 password,
+                // Vai para o trigger que cria o registro de cliente.
+                options: { data: { full_name: fullName, phone } },
             })
             if (error) throw new Error(error.message || "Não foi possível cadastrar.")
 

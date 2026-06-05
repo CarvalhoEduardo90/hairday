@@ -102,13 +102,12 @@ O sistema funciona **sem** WhatsApp; configure quando quiser ativá-lo.
 > log) — confirmação/cancelamento/reagendamento continuam indo por e-mail.
 > Obs.: a Z-API é não-oficial; use um número dedicado para reduzir risco.
 
-### 8. (Atualização) Assinaturas — rodar a migração
-Se o banco **já existe**, rode no **SQL Editor** do Supabase para adicionar a coluna:
-```sql
-alter table public.clients
-  add column if not exists is_subscriber boolean not null default false;
-```
-(Já está incluída no `supabase/schema.sql` para bancos novos.)
+### 8. (Atualização) Assinaturas e cadastro — rodar a migração
+Se o banco **já existe**, basta **rodar de novo o `supabase/schema.sql` inteiro**
+no SQL Editor (ele é idempotente). Isso adiciona:
+- a coluna `is_subscriber` em `clients`;
+- o trigger `on_auth_user_created`, que cria o registro de cliente assim que
+  alguém faz o cadastro (usando nome/telefone informados).
 
 **Como funcionam as categorias** (exibidas no painel admin):
 - **Avulso** — cliente sem conta de login.
@@ -119,8 +118,8 @@ Observações:
 - O vínculo conta ↔ cliente é por **e-mail**.
 - O limite de **1 corte/semana** do assinante é, por ora, **apenas informativo**
   (etiqueta). A regra de bloqueio (semana seg–dom) fica para uma próxima etapa.
-- Um cliente só aparece na lista depois de ter **agendado ao menos uma vez**
-  (é quando o registro de cliente é criado).
+- O cadastro (`/login.html` → "Criar conta") agora pede **nome, e-mail, telefone
+  e senha**, e o cliente **já aparece na lista do admin** mesmo antes de agendar.
 
 ## 🗺️ Páginas
 
