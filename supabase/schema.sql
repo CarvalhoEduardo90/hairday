@@ -14,6 +14,11 @@ create table if not exists public.clients (
   constraint clients_email_unique unique (email)
 );
 
+-- Assinatura: o admin marca/desmarca quem é assinante (direito a 1 corte/semana).
+-- Idempotente: pode rodar de novo num banco já existente sem erro.
+alter table public.clients
+  add column if not exists is_subscriber boolean not null default false;
+
 -- Tabela de agendamentos.
 create table if not exists public.appointments (
   id          uuid primary key default gen_random_uuid(),

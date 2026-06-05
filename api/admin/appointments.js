@@ -1,6 +1,7 @@
 const dayjs = require("dayjs")
 const { supabase } = require("../../lib/supabase")
 const { requireAdmin } = require("../../lib/auth")
+const { getAccountEmails, categorize } = require("../../lib/accounts")
 
 // /api/admin/appointments?date=YYYY-MM-DD
 //   GET (admin) -> lista completa dos agendamentos do dia, COM nome/contato.
@@ -24,7 +25,7 @@ module.exports = async function handler(req, res) {
 
         const { data, error } = await supabase
             .from("appointments")
-            .select("id, when_at, clients ( full_name, email, phone )")
+            .select("id, when_at, clients ( full_name, email, phone, is_subscriber )")
             .gte("when_at", start)
             .lte("when_at", end)
             .eq("status", "confirmed")
@@ -35,12 +36,21 @@ module.exports = async function handler(req, res) {
             return res.status(500).json({ error: "Erro ao buscar agendamentos." })
         }
 
+        const accountEmails = await getAccountEmails()
+
         const schedules = data.map((row) => ({
             id: row.id,
             when: row.when_at,
             name: row.clients?.full_name ?? "",
             email: row.clients?.email ?? "",
             phone: row.clients?.phone ?? "",
+            category: categorize(
+                {
+                    email: row.clients?.email,
+                    is_subscriber: row.clients?.is_subscriber,
+                },
+                accountEmails
+            ),
         }))
 
         return res.status(200).json(schedules)

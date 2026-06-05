@@ -13,6 +13,7 @@ module.exports = {
         login: path.resolve(__dirname, "src", "login.js"),
         admin: path.resolve(__dirname, "src", "admin.js"),
         conta: path.resolve(__dirname, "src", "conta.js"),
+        clientes: path.resolve(__dirname, "src", "clientes.js"),
     },
     output: {
         filename: "[name].js",
@@ -68,6 +69,12 @@ module.exports = {
             template: path.resolve(__dirname, "minha-conta.html"),
             filename: "minha-conta.html",
             chunks: ["conta"],
+        }),
+
+        new HtmlWebpackPlugin({
+            template: path.resolve(__dirname, "clientes.html"),
+            filename: "clientes.html",
+            chunks: ["clientes"],
         }),
 
         new CopywebpackPlugin({

@@ -12,7 +12,7 @@
     />
 
     <link rel="icon" href="./src/assets/scissors.svg" />
-    <title>Hair Day — Painel</title>
+    <title>Hair Day — Clientes</title>
 
     <style>
       .admin {
@@ -50,6 +50,58 @@
       .admin-logout:hover {
         background-color: #2e2c30;
       }
+
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        color: #98959d;
+        font-size: 0.8rem;
+        align-items: center;
+      }
+
+      .clients {
+        list-style: none;
+      }
+      .clients li {
+        border: 1px solid #2e2c30;
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+      .client-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .client-info strong {
+        display: block;
+      }
+      .client-info span {
+        color: #98959d;
+        font-size: 0.82rem;
+      }
+      .client-action button {
+        background: none;
+        border: 1px solid #2e2c30;
+        color: #f5f4f5;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 0.82rem;
+      }
+      .client-action button:hover:not(:disabled) {
+        background-color: #2e2c30;
+      }
+      .client-action button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       .badge {
         font-size: 0.7rem;
         font-weight: 700;
@@ -58,7 +110,6 @@
         text-transform: uppercase;
         letter-spacing: 0.03em;
         white-space: nowrap;
-        margin-right: 0.75rem;
       }
       .badge-avulso {
         background: #3e3c41;
@@ -72,37 +123,9 @@
         background: #b8952e;
         color: #19181b;
       }
-      .admin-controls {
-        margin-bottom: 1.5rem;
-        max-width: 16rem;
-      }
-      .schedule-period ul li .item-name {
-        flex: 1 1 6rem;
-      }
-      .item-actions {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        /* Empurra as ações para a direita; quebram para baixo se faltar espaço. */
-        margin-left: auto;
-      }
-      .item-actions button {
-        background: none;
-        border: none;
-        color: #b8952e;
-        cursor: pointer;
-        font-family: inherit;
-        font-size: 0.87rem;
-        text-decoration: underline;
-        /* Alvo de toque mais confortável no mobile. */
-        padding: 0.5rem 0.5rem;
-      }
-      .item-actions button:hover {
-        color: #dbc170;
-      }
       .empty {
         color: #98959d;
-        font-size: 0.87rem;
+        font-size: 0.9rem;
       }
     </style>
   </head>
@@ -111,52 +134,25 @@
       <div class="admin-top">
         <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
         <div class="admin-nav">
-          <a href="clientes.html" class="admin-logout">Clientes</a>
+          <a href="admin.html" class="admin-logout">Agendamentos</a>
           <button id="logout" class="admin-logout">Sair</button>
         </div>
       </div>
 
       <header style="margin-bottom: 1.5rem">
-        <h1>Agendamentos</h1>
+        <h1>Clientes</h1>
         <p style="color: #98959d; font-size: 0.87rem">
-          Gerencie os agendamentos do dia selecionado
+          Gerencie os assinantes da barbearia
         </p>
       </header>
 
-      <div class="admin-controls">
-        <label for="date" class="label">Data</label>
-        <div class="input">
-          <i><img src="./src/assets/calendar.svg" alt="Calendário" /></i>
-          <input type="date" id="date" name="date" required />
-        </div>
+      <div class="legend">
+        <span class="badge badge-avulso">Avulso</span> sem conta
+        <span class="badge badge-cadastrado">Cadastrado</span> com conta
+        <span class="badge badge-assinante">Assinante</span> assinante (1 corte/semana)
       </div>
 
-      <section class="schedule-period">
-        <header>
-          <img src="./src/assets/morning.svg" alt="Manhã" />
-          <strong>Manhã</strong>
-          <span>09h-12h</span>
-        </header>
-        <ul id="period-morning" class="period"></ul>
-      </section>
-
-      <section class="schedule-period">
-        <header>
-          <img src="./src/assets/afternoon.svg" alt="Tarde" />
-          <strong>Tarde</strong>
-          <span>13h-18h</span>
-        </header>
-        <ul id="period-afternoon" class="period"></ul>
-      </section>
-
-      <section class="schedule-period">
-        <header>
-          <img src="./src/assets/night.svg" alt="Noite" />
-          <strong>Noite</strong>
-          <span>19h-21h</span>
-        </header>
-        <ul id="period-night" class="period"></ul>
-      </section>
+      <ul class="clients" id="clients"></ul>
     </main>
   </body>
 </html>

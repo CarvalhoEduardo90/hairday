@@ -64,10 +64,15 @@ function iso(h) {
 }
 
 const adminData = [
-    { id: "1", when: iso(9), name: "Rodrigo Gonçalves", email: "a@a.com", phone: "11999990001" },
-    { id: "2", when: iso(10), name: "Marina Alves", email: "b@b.com", phone: "11999990002" },
-    { id: "3", when: iso(14), name: "Carlos Henrique", email: "c@c.com", phone: "11999990003" },
-    { id: "4", when: iso(20), name: "Felipe Costa", email: "d@d.com", phone: "11999990004" },
+    { id: "1", when: iso(9), name: "Rodrigo Gonçalves", email: "a@a.com", phone: "11999990001", category: "assinante" },
+    { id: "2", when: iso(10), name: "Marina Alves", email: "b@b.com", phone: "11999990002", category: "cadastrado" },
+    { id: "3", when: iso(14), name: "Carlos Henrique", email: "c@c.com", phone: "11999990003", category: "avulso" },
+    { id: "4", when: iso(20), name: "Felipe Costa", email: "d@d.com", phone: "11999990004", category: "assinante" },
+]
+const clientsData = [
+    { id: "1", name: "Rodrigo Gonçalves", email: "rodrigo@email.com", phone: "(11) 99999-0001", isSubscriber: true, hasAccount: true, category: "assinante" },
+    { id: "2", name: "Marina Alves", email: "marina@email.com", phone: "(11) 99999-0002", isSubscriber: false, hasAccount: true, category: "cadastrado" },
+    { id: "3", name: "Carlos Henrique", email: "carlos@email.com", phone: "(11) 99999-0003", isSubscriber: false, hasAccount: false, category: "avulso" },
 ]
 const clientData = [
     { id: "1", when: iso(10) },
@@ -84,6 +89,7 @@ const pages = [
     { name: "login", url: "/login.html", protected: false },
     { name: "admin", url: "/admin.html", protected: true, data: adminData },
     { name: "conta", url: "/minha-conta.html", protected: true, data: clientData },
+    { name: "clientes", url: "/clientes.html", protected: true, data: clientsData },
 ]
 
 async function run() {
@@ -106,6 +112,9 @@ async function run() {
                 }
                 if (u.includes("/api/my-appointments")) {
                     return route.fulfill({ json: clientData })
+                }
+                if (u.includes("/api/admin/clients")) {
+                    return route.fulfill({ json: clientsData })
                 }
                 if (u.includes("/api/appointments")) {
                     return route.fulfill({ json: [] })

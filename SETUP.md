@@ -102,13 +102,34 @@ O sistema funciona **sem** WhatsApp; configure quando quiser ativá-lo.
 > log) — confirmação/cancelamento/reagendamento continuam indo por e-mail.
 > Obs.: a Z-API é não-oficial; use um número dedicado para reduzir risco.
 
+### 8. (Atualização) Assinaturas — rodar a migração
+Se o banco **já existe**, rode no **SQL Editor** do Supabase para adicionar a coluna:
+```sql
+alter table public.clients
+  add column if not exists is_subscriber boolean not null default false;
+```
+(Já está incluída no `supabase/schema.sql` para bancos novos.)
+
+**Como funcionam as categorias** (exibidas no painel admin):
+- **Avulso** — cliente sem conta de login.
+- **Cadastrado** — cliente com conta (e-mail bate com um usuário do Auth).
+- **Assinante** — cliente com conta **e** marcado como assinante na tela `/clientes.html`.
+
+Observações:
+- O vínculo conta ↔ cliente é por **e-mail**.
+- O limite de **1 corte/semana** do assinante é, por ora, **apenas informativo**
+  (etiqueta). A regra de bloqueio (semana seg–dom) fica para uma próxima etapa.
+- Um cliente só aparece na lista depois de ter **agendado ao menos uma vez**
+  (é quando o registro de cliente é criado).
+
 ## 🗺️ Páginas
 
 | Rota | Quem | Função |
 |---|---|---|
 | `/` (`index.html`) | Público | Agendar + ver disponibilidade (sem nomes) |
 | `/login.html` | Todos | Login e cadastro (e-mail + senha) |
-| `/admin.html` | Admin | Painel: ver/cancelar/remarcar todos os agendamentos |
+| `/admin.html` | Admin | Painel: ver/cancelar/remarcar todos os agendamentos (com etiqueta de categoria) |
+| `/clientes.html` | Admin | Gestão de clientes: marcar/desmarcar assinante |
 | `/minha-conta.html` | Cliente | Ver/cancelar/remarcar os próprios agendamentos |
 
 > O vínculo entre conta e agendamentos é pelo **e-mail**: o cliente vê os

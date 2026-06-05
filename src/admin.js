@@ -16,6 +16,16 @@ const periodMorning = document.getElementById("period-morning")
 const periodAfternoon = document.getElementById("period-afternoon")
 const periodNight = document.getElementById("period-night")
 
+// Rótulo legível da categoria do cliente.
+function categoryLabel(category) {
+    const labels = {
+        avulso: "Avulso",
+        cadastrado: "Cadastrado",
+        assinante: "Assinante",
+    }
+    return labels[category] || "Avulso"
+}
+
 // fetch que injeta o token de autenticação.
 async function authFetch(path, options = {}) {
     const token = await getAccessToken()
@@ -84,6 +94,10 @@ function render(schedules) {
         name.classList.add("item-name")
         name.textContent = schedule.name
 
+        const badge = document.createElement("span")
+        badge.classList.add("badge", `badge-${schedule.category}`)
+        badge.textContent = categoryLabel(schedule.category)
+
         const actions = document.createElement("div")
         actions.classList.add("item-actions")
 
@@ -100,7 +114,7 @@ function render(schedules) {
         cancelBtn.addEventListener("click", () => cancelAppointment(schedule))
 
         actions.append(rescheduleBtn, cancelBtn)
-        item.append(time, name, actions)
+        item.append(time, name, badge, actions)
 
         const hour = dayjs(schedule.when).hour()
         if (hour <= 12) {

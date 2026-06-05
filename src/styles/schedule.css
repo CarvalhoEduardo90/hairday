@@ -56,12 +56,16 @@
 }
 
 .schedule-period ul li {
-  height: 2rem;
+  min-height: 2rem;
   color: #b2afb6;
   font-size: 1rem;
 
   display: flex;
   align-items: center;
+  /* Permite quebrar para uma segunda linha em telas estreitas, sem sobrepor. */
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  padding: 0.35rem 0;
 }
 
 .schedule-period ul li span {
