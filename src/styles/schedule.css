@@ -68,6 +68,11 @@
   flex: 1;
 }
 
+.hour-empty {
+  color: #807d84;
+  font-size: 0.87rem;
+}
+
 .cancel-icon {
   cursor: pointer;
   transition: opacity 0.2s;

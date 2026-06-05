@@ -42,6 +42,15 @@
         font-size: 0.87rem;
         margin-bottom: 1.5rem;
       }
+      /* Formulário do login: empilha os campos ocupando toda a largura do card. */
+      .login-card form {
+        display: flex;
+        flex-direction: column;
+      }
+      .login-card .label {
+        display: block;
+        margin-bottom: 0.5rem;
+      }
     </style>
   </head>
   <body>
@@ -53,7 +62,7 @@
           Acesse para gerenciar seus agendamentos
         </p>
 
-        <form class="form" id="login-form">
+        <form id="login-form">
           <label for="email" class="label">E-mail</label>
           <div class="input">
             <input

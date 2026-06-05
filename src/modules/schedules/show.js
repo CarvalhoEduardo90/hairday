@@ -32,6 +32,16 @@ export function schedulesShow({ dailySchedules }) {
                 periodNight.appendChild(item)
             }
         })
+
+        // Mostra uma mensagem nos períodos sem horários ocupados.
+        ;[periodMorning, periodAfternoon, periodNight].forEach((ul) => {
+            if (ul.children.length === 0) {
+                const empty = document.createElement("li")
+                empty.classList.add("hour-empty")
+                empty.textContent = "Nenhum horário ocupado."
+                ul.appendChild(empty)
+            }
+        })
     } catch (error) {
         console.log(error)
         alert("Não foi possível carregar os horários ocupados. Tente novamente mais tarde.")

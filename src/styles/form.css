@@ -57,11 +57,15 @@
   font-family: "Catamaran", sans-serif;
 
   font-size: 1rem;
-  color: #b2afb6;
+  color: #f5f4f5;
   background-color: transparent;
 
   outline: none;
   border: none;
+}
+
+.input input::placeholder {
+  color: #807d84;
 }
 
 .input:focus-within {
@@ -150,5 +154,7 @@
   .form {
     overflow-y: auto;
     max-width: 100%;
+    /* Reduz o padding lateral no mobile (mantém o topo livre para a logo). */
+    padding: 5rem 1.25rem 1.5rem;
   }
 }
