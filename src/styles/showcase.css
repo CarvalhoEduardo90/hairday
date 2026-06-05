@@ -1,0 +1,96 @@
+.showcase {
+  grid-area: schedule;
+  padding: 5rem 7.75rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.showcase-logo {
+  width: 11rem;
+  margin-bottom: 2.5rem;
+}
+
+.showcase-title {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0.75rem;
+}
+
+.showcase-subtitle {
+  color: #98959d;
+  font-size: 1rem;
+  max-width: 26rem;
+  margin-bottom: 2.5rem;
+}
+
+.testimonial {
+  background-color: #232225;
+  border: 1px solid #2e2c30;
+  border-radius: 0.75rem;
+  padding: 1.75rem;
+  max-width: 30rem;
+}
+
+.testimonial-stars {
+  color: #b8952e;
+  letter-spacing: 0.15rem;
+  margin-bottom: 0.75rem;
+}
+
+.testimonial-text {
+  font-size: 1.05rem;
+  line-height: 1.5;
+  color: #f5f4f5;
+  margin-bottom: 1rem;
+  /* Evita "pulo" de altura ao trocar de depoimento. */
+  min-height: 4.5rem;
+}
+
+.testimonial-author {
+  color: #b8952e;
+  font-weight: 700;
+}
+
+.testimonial-dots {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.testimonial-dots .dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #3e3c41;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.testimonial-dots .dot.active {
+  background-color: #b8952e;
+}
+
+@media (max-width: 1100px) {
+  .showcase {
+    padding: 1rem 1.5rem 3rem;
+    text-align: center;
+    align-items: center;
+  }
+
+  .showcase-title {
+    font-size: 1.6rem;
+  }
+
+  .testimonial {
+    text-align: left;
+  }
+
+  .testimonial-dots {
+    justify-content: center;
+  }
+}
