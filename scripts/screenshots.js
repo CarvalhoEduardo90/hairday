@@ -62,6 +62,21 @@ function iso(h) {
     d.setHours(h, 0, 0, 0)
     return d.toISOString()
 }
+// Data/hora com deslocamento de dias (negativo = passado).
+function isoDay(daysOffset, h) {
+    const d = new Date(today)
+    d.setDate(d.getDate() + daysOffset)
+    d.setHours(h, 0, 0, 0)
+    return d.toISOString()
+}
+
+// Agendamentos do cliente (área "Minha conta") e histórico (admin).
+const myAppointments = [
+    { id: "1", when: isoDay(3, 10), status: "confirmed" }, // próximo
+    { id: "2", when: isoDay(7, 15), status: "confirmed" }, // próximo
+    { id: "3", when: isoDay(-5, 9), status: "confirmed" }, // realizado
+    { id: "4", when: isoDay(-12, 16), status: "cancelled" }, // cancelado
+]
 
 const adminData = [
     { id: "1", when: iso(9), name: "Rodrigo Gonçalves", email: "a@a.com", phone: "11999990001", category: "assinante" },
@@ -111,7 +126,10 @@ async function run() {
                     return route.fulfill({ json: adminData })
                 }
                 if (u.includes("/api/my-appointments")) {
-                    return route.fulfill({ json: clientData })
+                    return route.fulfill({ json: myAppointments })
+                }
+                if (u.includes("/api/admin/client-history")) {
+                    return route.fulfill({ json: myAppointments })
                 }
                 if (u.includes("/api/admin/clients")) {
                     return route.fulfill({ json: clientsData })
@@ -158,6 +176,21 @@ async function run() {
                 const f3 = path.join(OUT, `login-modal-${vpName}.png`)
                 await page.screenshot({ path: f3, fullPage: true })
                 console.log("ok:", f3)
+            }
+
+            // Variante: modal de histórico de cliente (tela Clientes).
+            if (p.name === "clientes") {
+                await page.click(".client-action button") // primeiro = "Histórico"
+                await page.waitForTimeout(400)
+                const fh = path.join(OUT, `clientes-history-${vpName}.png`)
+                // Captura só o elemento do modal (imagem compacta).
+                const modalEl = await page.$(".modal")
+                await modalEl.screenshot({ path: fh })
+                console.log("ok:", fh)
+                const modalText = (await page.textContent(".modal"))
+                    .replace(/\s+/g, " ")
+                    .trim()
+                console.log("MODAL TEXT:", modalText)
             }
 
             await context.close()

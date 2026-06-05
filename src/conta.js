@@ -11,7 +11,8 @@ import { openingHours } from "./utils/opening-hours.js"
 
 const logoutButton = document.getElementById("logout")
 const accountEmail = document.getElementById("account-email")
-const list = document.getElementById("appointments")
+const upcomingList = document.getElementById("upcoming")
+const historyList = document.getElementById("history")
 
 async function authFetch(path, options = {}) {
     const token = await getAccessToken()
@@ -35,6 +36,17 @@ async function ensureLoggedIn() {
     return data.session.user
 }
 
+// Classifica um agendamento em próximo / realizado / cancelado.
+function statusInfo(schedule) {
+    if (schedule.status === "cancelled") {
+        return { label: "Cancelado", cls: "st-cancelled" }
+    }
+    if (dayjs(schedule.when).isBefore(dayjs())) {
+        return { label: "Realizado", cls: "st-done" }
+    }
+    return { label: "Próximo", cls: "st-upcoming" }
+}
+
 async function loadAppointments() {
     const response = await authFetch("/my-appointments")
     if (!response.ok) {
@@ -42,18 +54,31 @@ async function loadAppointments() {
         return
     }
 
-    const schedules = await response.json()
-    render(schedules)
+    const all = await response.json()
+
+    // Próximos = confirmados e ainda no futuro (ordem crescente).
+    const upcoming = all
+        .filter(
+            (s) => s.status === "confirmed" && dayjs(s.when).isAfter(dayjs())
+        )
+        .sort((a, b) => dayjs(a.when) - dayjs(b.when))
+
+    // Histórico = o restante (passados ou cancelados), mais recentes primeiro.
+    const history = all
+        .filter(
+            (s) => !(s.status === "confirmed" && dayjs(s.when).isAfter(dayjs()))
+        )
+        .sort((a, b) => dayjs(b.when) - dayjs(a.when))
+
+    renderUpcoming(upcoming)
+    renderHistory(history)
 }
 
-function render(schedules) {
-    list.innerHTML = ""
+function renderUpcoming(schedules) {
+    upcomingList.innerHTML = ""
 
     if (schedules.length === 0) {
-        const empty = document.createElement("li")
-        empty.classList.add("empty")
-        empty.textContent = "Você não tem agendamentos futuros."
-        list.appendChild(empty)
+        upcomingList.appendChild(emptyItem("Você não tem agendamentos futuros."))
         return
     }
 
@@ -75,8 +100,40 @@ function render(schedules) {
         cancelBtn.addEventListener("click", () => cancel(schedule))
 
         item.append(when, rescheduleBtn, cancelBtn)
-        list.appendChild(item)
+        upcomingList.appendChild(item)
     })
+}
+
+function renderHistory(schedules) {
+    historyList.innerHTML = ""
+
+    if (schedules.length === 0) {
+        historyList.appendChild(emptyItem("Nenhum agendamento no histórico."))
+        return
+    }
+
+    schedules.forEach((schedule) => {
+        const item = document.createElement("li")
+
+        const when = document.createElement("span")
+        when.classList.add("when")
+        when.textContent = dayjs(schedule.when).format("DD/MM/YYYY [às] HH:mm")
+
+        const { label, cls } = statusInfo(schedule)
+        const status = document.createElement("span")
+        status.classList.add("status", cls)
+        status.textContent = label
+
+        item.append(when, status)
+        historyList.appendChild(item)
+    })
+}
+
+function emptyItem(text) {
+    const li = document.createElement("li")
+    li.classList.add("empty")
+    li.textContent = text
+    return li
 }
 
 async function cancel(schedule) {

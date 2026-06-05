@@ -127,6 +127,97 @@
         color: #98959d;
         font-size: 0.9rem;
       }
+
+      .client-action {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      /* Status (usado no histórico). */
+      .status {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+      }
+      .st-upcoming {
+        background: #243b53;
+        color: #9ec5ff;
+      }
+      .st-done {
+        background: #1f3d2b;
+        color: #86e0a6;
+      }
+      .st-cancelled {
+        background: #3e2c2c;
+        color: #f0a3a3;
+      }
+
+      /* Modal de histórico. */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        z-index: 50;
+      }
+      .modal-backdrop[hidden] {
+        display: none;
+      }
+      .modal {
+        background-color: #232225;
+        border: 1px solid #2e2c30;
+        border-radius: 0.75rem;
+        max-width: 32rem;
+        width: 100%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #2e2c30;
+      }
+      .modal-head h2 {
+        font-size: 1.1rem;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        color: #f5f4f5;
+        font-size: 1.2rem;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .modal-body {
+        padding: 1rem 1.5rem 1.5rem;
+        overflow-y: auto;
+      }
+      .history-list {
+        list-style: none;
+      }
+      .history-list li {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #2e2c30;
+      }
+      .history-list li:last-child {
+        border-bottom: none;
+      }
+      .history-list .when {
+        flex: 1;
+      }
     </style>
   </head>
   <body>
@@ -154,5 +245,25 @@
 
       <ul class="clients" id="clients"></ul>
     </main>
+
+    <!-- Modal de histórico do cliente -->
+    <div class="modal-backdrop" id="history-modal" hidden>
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="history-title"
+      >
+        <div class="modal-head">
+          <h2 id="history-title">Histórico</h2>
+          <button class="modal-close" id="history-close" aria-label="Fechar">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body">
+          <ul class="history-list" id="history-list"></ul>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

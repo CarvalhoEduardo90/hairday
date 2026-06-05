@@ -4,11 +4,17 @@ import "./libs/dayjs.js"
 import "./styles/global.css"
 import "./styles/form.css"
 
+import dayjs from "dayjs"
 import { supabase, getAccessToken } from "./libs/supabase-client.js"
 import { apiConfig } from "./services/api-config.js"
 
 const logoutButton = document.getElementById("logout")
 const list = document.getElementById("clients")
+
+const historyModal = document.getElementById("history-modal")
+const historyTitle = document.getElementById("history-title")
+const historyListEl = document.getElementById("history-list")
+const historyClose = document.getElementById("history-close")
 
 async function authFetch(path, options = {}) {
     const token = await getAccessToken()
@@ -94,6 +100,12 @@ function render(clients) {
 
         const actionWrap = document.createElement("div")
         actionWrap.classList.add("client-action")
+
+        const historyBtn = document.createElement("button")
+        historyBtn.type = "button"
+        historyBtn.textContent = "Histórico"
+        historyBtn.addEventListener("click", () => openHistory(client))
+
         const button = document.createElement("button")
         button.type = "button"
 
@@ -109,11 +121,70 @@ function render(clients) {
             button.addEventListener("click", () => toggle(client, true))
         }
 
-        actionWrap.appendChild(button)
+        actionWrap.append(historyBtn, button)
         item.append(info, badge, actionWrap)
         list.appendChild(item)
     })
 }
+
+// ===== Histórico do cliente (modal) =====
+function statusInfo(schedule) {
+    if (schedule.status === "cancelled") {
+        return { label: "Cancelado", cls: "st-cancelled" }
+    }
+    if (dayjs(schedule.when).isBefore(dayjs())) {
+        return { label: "Realizado", cls: "st-done" }
+    }
+    return { label: "Próximo", cls: "st-upcoming" }
+}
+
+async function openHistory(client) {
+    historyTitle.textContent = `Histórico — ${client.name}`
+    historyListEl.innerHTML = "<li class='empty'>Carregando…</li>"
+    historyModal.hidden = false
+
+    const response = await authFetch(`/admin/client-history?clientId=${client.id}`)
+    if (!response.ok) {
+        historyListEl.innerHTML = "<li class='empty'>Erro ao carregar o histórico.</li>"
+        return
+    }
+
+    const history = await response.json()
+    historyListEl.innerHTML = ""
+
+    if (history.length === 0) {
+        historyListEl.innerHTML = "<li class='empty'>Nenhum agendamento.</li>"
+        return
+    }
+
+    history.forEach((schedule) => {
+        const li = document.createElement("li")
+
+        const when = document.createElement("span")
+        when.classList.add("when")
+        when.textContent = dayjs(schedule.when).format("DD/MM/YYYY [às] HH:mm")
+
+        const { label, cls } = statusInfo(schedule)
+        const status = document.createElement("span")
+        status.classList.add("status", cls)
+        status.textContent = label
+
+        li.append(when, status)
+        historyListEl.appendChild(li)
+    })
+}
+
+function closeHistory() {
+    historyModal.hidden = true
+}
+
+historyClose.addEventListener("click", closeHistory)
+historyModal.addEventListener("click", (event) => {
+    if (event.target === historyModal) closeHistory()
+})
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !historyModal.hidden) closeHistory()
+})
 
 async function toggle(client, isSubscriber) {
     const response = await authFetch(`/admin/clients/${client.id}`, {

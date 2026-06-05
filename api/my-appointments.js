@@ -2,8 +2,9 @@ const { supabase } = require("../lib/supabase")
 const { requireAuth } = require("../lib/auth")
 
 // /api/my-appointments
-//   GET -> agendamentos futuros confirmados do cliente autenticado.
-// O vínculo é feito pelo e-mail (mesmo usado no agendamento e no login).
+//   GET -> TODOS os agendamentos do cliente autenticado (confirmados e
+//   cancelados, passados e futuros). O front separa em "Próximos" e
+//   "Histórico". O vínculo é feito pelo e-mail.
 module.exports = async function handler(req, res) {
     try {
         if (req.method !== "GET") {
@@ -33,18 +34,20 @@ module.exports = async function handler(req, res) {
 
         const { data, error } = await supabase
             .from("appointments")
-            .select("id, when_at")
+            .select("id, when_at, status")
             .eq("client_id", client.id)
-            .eq("status", "confirmed")
-            .gte("when_at", new Date().toISOString())
-            .order("when_at", { ascending: true })
+            .order("when_at", { ascending: false })
 
         if (error) {
             console.error(error)
             return res.status(500).json({ error: "Erro ao buscar seus agendamentos." })
         }
 
-        const schedules = data.map((row) => ({ id: row.id, when: row.when_at }))
+        const schedules = data.map((row) => ({
+            id: row.id,
+            when: row.when_at,
+            status: row.status,
+        }))
         return res.status(200).json(schedules)
     } catch (error) {
         console.error(error)

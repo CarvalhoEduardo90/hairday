@@ -91,6 +91,36 @@
         color: #98959d;
         font-size: 0.9rem;
       }
+
+      .section-title {
+        font-size: 1.1rem;
+        margin: 2rem 0 1rem;
+      }
+      .section-title:first-of-type {
+        margin-top: 1rem;
+      }
+
+      .status {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        border-radius: 999px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+      }
+      .st-upcoming {
+        background: #243b53;
+        color: #9ec5ff;
+      }
+      .st-done {
+        background: #1f3d2b;
+        color: #86e0a6;
+      }
+      .st-cancelled {
+        background: #3e2c2c;
+        color: #f0a3a3;
+      }
     </style>
   </head>
   <body>
@@ -106,7 +136,11 @@
       <h1>Meus agendamentos</h1>
       <p class="subtitle" id="account-email">&nbsp;</p>
 
-      <ul class="appointments" id="appointments"></ul>
+      <h2 class="section-title">Próximos</h2>
+      <ul class="appointments" id="upcoming"></ul>
+
+      <h2 class="section-title">Histórico</h2>
+      <ul class="appointments" id="history"></ul>
     </main>
   </body>
 </html>
