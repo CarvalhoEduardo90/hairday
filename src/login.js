@@ -7,6 +7,7 @@ import "./styles/form.css"
 import { supabase, getAccessToken } from "./libs/supabase-client.js"
 import { apiConfig } from "./services/api-config.js"
 import { isValidEmail, isValidPhone } from "./utils/validation.js"
+import { privacyPolicy, termsOfUse } from "./legal.js"
 
 const form = document.getElementById("login-form")
 const fullnameInput = document.getElementById("fullname")
@@ -50,6 +51,39 @@ toggleLink.addEventListener("click", (event) => {
     event.preventDefault()
     mode = mode === "signin" ? "signup" : "signin"
     applyMode()
+})
+
+// ===== Modal (Política de Privacidade / Termos de Uso) =====
+const modal = document.getElementById("modal")
+const modalTitle = document.getElementById("modal-title")
+const modalBody = document.getElementById("modal-body")
+const modalClose = document.getElementById("modal-close")
+
+function openModal({ title, html }) {
+    modalTitle.textContent = title
+    modalBody.innerHTML = html
+    modal.hidden = false
+}
+
+function closeModal() {
+    modal.hidden = true
+}
+
+document
+    .getElementById("open-privacy")
+    .addEventListener("click", () => openModal(privacyPolicy))
+document
+    .getElementById("open-terms")
+    .addEventListener("click", () => openModal(termsOfUse))
+
+modalClose.addEventListener("click", closeModal)
+// Fecha ao clicar no fundo (fora do card).
+modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeModal()
+})
+// Fecha com a tecla ESC.
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !modal.hidden) closeModal()
 })
 
 // Consulta o papel do usuário e redireciona de acordo.

@@ -126,7 +126,7 @@ Observações:
 | Rota | Quem | Função |
 |---|---|---|
 | `/` (`index.html`) | Público | Agendar + ver disponibilidade (sem nomes) |
-| `/login.html` | Todos | Login e cadastro (e-mail + senha) |
+| `/login.html` | Todos | Login e cadastro (e-mail + senha) + Política/Termos em modal |
 | `/admin.html` | Admin | Painel: ver/cancelar/remarcar todos os agendamentos (com etiqueta de categoria) |
 | `/clientes.html` | Admin | Gestão de clientes: marcar/desmarcar assinante |
 | `/minha-conta.html` | Cliente | Ver/cancelar/remarcar os próprios agendamentos |
@@ -134,6 +134,10 @@ Observações:
 > O vínculo entre conta e agendamentos é pelo **e-mail**: o cliente vê os
 > agendamentos feitos com o mesmo e-mail do login (mesmo os criados antes de
 > ele ter conta).
+
+> ⚖️ **Textos legais**: a Política de Privacidade e os Termos de Uso são um
+> **rascunho base** em `src/legal.js` — edite o conteúdo e revise com apoio
+> jurídico antes de publicar como definitivo.
 
 ## 🔜 Próximas fases (combinadas)
 

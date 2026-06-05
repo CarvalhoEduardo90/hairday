@@ -15,19 +15,43 @@
     <title>Hair Day — Entrar</title>
 
     <style>
-      .login-wrapper {
+      /* Botão de voltar ao início. */
+      .back-link {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        z-index: 10;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #f5f4f5;
+        text-decoration: none;
+        font-size: 0.9rem;
+        border: 1px solid #2e2c30;
+        background-color: #2e2c30;
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.85rem;
+      }
+      .back-link:hover {
+        background-color: #3e3c41;
+      }
+
+      /* Layout de duas colunas (igual à home). */
+      .auth {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         min-height: 100vh;
+      }
+      .auth-form-col {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 1.5rem;
+        padding: 2rem 1.5rem;
       }
+
       .login-card {
         width: 100%;
         max-width: 22rem;
-        background-color: #2e2c30;
-        border-radius: 0.75rem;
-        padding: 2rem;
       }
       .login-card img.logo-img {
         height: 2.5rem;
@@ -42,7 +66,6 @@
         font-size: 0.87rem;
         margin-bottom: 1.5rem;
       }
-      /* Formulário do login: empilha os campos ocupando toda a largura do card. */
       .login-card form {
         display: flex;
         flex-direction: column;
@@ -51,87 +74,268 @@
         display: block;
         margin-bottom: 0.5rem;
       }
-      /* Campos exibidos apenas no modo "Criar conta". */
       .signup-only {
         display: none;
+      }
+
+      /* Texto legal abaixo do botão. */
+      .legal-text {
+        color: #807d84;
+        font-size: 0.78rem;
+        text-align: center;
+        line-height: 1.5;
+        margin-top: 1rem;
+      }
+      .legal-link {
+        color: #b8952e;
+        text-decoration: underline;
+        font-weight: 700;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: inherit;
+        font-size: inherit;
+        padding: 0;
+      }
+
+      /* Card de benefícios (lado direito, só desktop). */
+      .auth-side {
+        background-color: #232225;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 4rem;
+      }
+      .auth-side .side-logo {
+        width: 10rem;
+        margin-bottom: 2.5rem;
+      }
+      .auth-side h2 {
+        font-size: 1.9rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 0.75rem;
+      }
+      .auth-side .side-sub {
+        color: #98959d;
+        font-size: 1rem;
+        margin-bottom: 2.5rem;
+        max-width: 26rem;
+      }
+      .benefits {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 26rem;
+      }
+      .benefits li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        color: #f5f4f5;
+        font-size: 1rem;
+      }
+      .benefits li::before {
+        content: "✓";
+        color: #b8952e;
+        font-weight: 700;
+      }
+
+      /* Modal (Política / Termos). */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(0, 0, 0, 0.65);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        z-index: 50;
+      }
+      .modal-backdrop[hidden] {
+        display: none;
+      }
+      .modal {
+        background-color: #232225;
+        border: 1px solid #2e2c30;
+        border-radius: 0.75rem;
+        max-width: 38rem;
+        width: 100%;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #2e2c30;
+      }
+      .modal-head h2 {
+        font-size: 1.15rem;
+      }
+      .modal-close {
+        background: none;
+        border: none;
+        color: #f5f4f5;
+        font-size: 1.2rem;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .modal-body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        color: #b2afb6;
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+      .modal-body h3 {
+        color: #f5f4f5;
+        font-size: 1rem;
+        margin: 1.1rem 0 0.4rem;
+      }
+      .modal-body ul {
+        margin: 0 0 0.6rem 1.2rem;
+      }
+      .modal-body p {
+        margin-bottom: 0.6rem;
+      }
+
+      /* Mobile: uma coluna, sem o card lateral. */
+      @media (max-width: 1100px) {
+        .auth {
+          grid-template-columns: 1fr;
+        }
+        .auth-side {
+          display: none;
+        }
       }
     </style>
   </head>
   <body>
-    <div class="login-wrapper">
-      <div class="login-card">
-        <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
-        <h1 id="form-title">Entrar</h1>
-        <p class="subtitle" id="form-subtitle">
-          Acesse para gerenciar seus agendamentos
-        </p>
+    <a href="index.html" class="back-link">← Voltar ao início</a>
 
-        <form id="login-form">
-          <div class="signup-only">
-            <label for="fullname" class="label">Nome completo</label>
+    <div class="auth">
+      <section class="auth-form-col">
+        <div class="login-card">
+          <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+          <h1 id="form-title">Entrar</h1>
+          <p class="subtitle" id="form-subtitle">
+            Acesse para gerenciar seus agendamentos
+          </p>
+
+          <form id="login-form">
+            <div class="signup-only">
+              <label for="fullname" class="label">Nome completo</label>
+              <div class="input">
+                <input
+                  type="text"
+                  id="fullname"
+                  name="fullname"
+                  placeholder="Seu nome completo"
+                  autocomplete="name"
+                />
+              </div>
+            </div>
+
+            <label for="email" class="label">E-mail</label>
             <div class="input">
               <input
-                type="text"
-                id="fullname"
-                name="fullname"
-                placeholder="Seu nome completo"
-                autocomplete="name"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="email@exemplo.com"
+                autocomplete="email"
+                required
               />
             </div>
-          </div>
 
-          <label for="email" class="label">E-mail</label>
-          <div class="input">
-            <input
-              type="email"
-              id="email"
-              name="email"
-              placeholder="email@exemplo.com"
-              autocomplete="email"
-              required
-            />
-          </div>
+            <div class="signup-only">
+              <label for="phone" class="label">Contato</label>
+              <div class="input">
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  placeholder="(00) 00000-0000"
+                  autocomplete="tel"
+                />
+              </div>
+            </div>
 
-          <div class="signup-only">
-            <label for="phone" class="label">Contato</label>
+            <label for="password" class="label">Senha</label>
             <div class="input">
               <input
-                type="tel"
-                id="phone"
-                name="phone"
-                placeholder="(00) 00000-0000"
-                autocomplete="tel"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Sua senha"
+                autocomplete="current-password"
+                required
               />
             </div>
-          </div>
 
-          <label for="password" class="label">Senha</label>
-          <div class="input">
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder="Sua senha"
-              autocomplete="current-password"
-              required
-            />
-          </div>
+            <button type="submit" class="button" id="submit-button">Entrar</button>
+          </form>
 
-          <button type="submit" class="button" id="submit-button">Entrar</button>
-        </form>
+          <p class="legal-text">
+            Ao continuar, você concorda com a
+            <button type="button" class="legal-link" id="open-privacy">
+              Política de Privacidade</button
+            >
+            e os
+            <button type="button" class="legal-link" id="open-terms">
+              Termos de Uso</button
+            >.
+          </p>
 
-        <p
-          class="subtitle"
-          style="margin-top: 1rem; margin-bottom: 0; text-align: center"
-        >
-          <span id="toggle-text">Não tem conta?</span>
-          <a
-            id="toggle-mode"
-            href="#"
-            style="color: #b8952e; cursor: pointer; font-weight: 700"
-            >Criar conta</a
+          <p
+            class="subtitle"
+            style="margin-top: 1rem; margin-bottom: 0; text-align: center"
           >
+            <span id="toggle-text">Não tem conta?</span>
+            <a
+              id="toggle-mode"
+              href="#"
+              style="color: #b8952e; cursor: pointer; font-weight: 700"
+              >Criar conta</a
+            >
+          </p>
+        </div>
+      </section>
+
+      <aside class="auth-side">
+        <img src="./src/assets/logo.svg" alt="Hair Day" class="side-logo" />
+        <h2>Sua barbearia na palma da mão</h2>
+        <p class="side-sub">
+          Crie sua conta e tenha o controle dos seus atendimentos.
         </p>
+        <ul class="benefits">
+          <li>Acompanhe seus agendamentos a qualquer hora</li>
+          <li>Remarque ou cancele em poucos cliques</li>
+          <li>Receba confirmações e lembretes por e-mail</li>
+          <li>Assinante tem direito a 1 corte por semana</li>
+        </ul>
+      </aside>
+    </div>
+
+    <!-- Modal reutilizável (Política / Termos) -->
+    <div class="modal-backdrop" id="modal" hidden>
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <div class="modal-head">
+          <h2 id="modal-title"></h2>
+          <button class="modal-close" id="modal-close" aria-label="Fechar">
+            ✕
+          </button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
       </div>
     </div>
   </body>

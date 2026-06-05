@@ -150,6 +150,13 @@ async function run() {
                 const f2 = path.join(OUT, `login-signup-${vpName}.png`)
                 await page.screenshot({ path: f2, fullPage: true })
                 console.log("ok:", f2)
+
+                // Variante: modal da Política de Privacidade aberto.
+                await page.click("#open-privacy")
+                await page.waitForTimeout(300)
+                const f3 = path.join(OUT, `login-modal-${vpName}.png`)
+                await page.screenshot({ path: f3, fullPage: true })
+                console.log("ok:", f3)
             }
 
             await context.close()
