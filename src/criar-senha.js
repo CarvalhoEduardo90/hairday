@@ -48,7 +48,7 @@ function getFriendlyError(error) {
         message.includes("token") ||
         message.includes("missing")
     ) {
-        return "Link expirado, invalido ou ja utilizado. Peca ao administrador um novo convite."
+        return "Link expirado, invalido ou ja utilizado. Peca um novo convite ou link de acesso."
     }
 
     if (

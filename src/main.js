@@ -1,5 +1,7 @@
 "use strict"
 
+import "./modules/auth-redirect.js"
+
 // Configuração do dayjs
 import "./libs/dayjs.js"
 
