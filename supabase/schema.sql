@@ -117,6 +117,47 @@ create index if not exists appointments_when_idx
 create index if not exists appointments_barber_when_idx
   on public.appointments (barber_id, when_at);
 
+-- Protege contra sobreposicao de atendimentos com duracoes diferentes.
+-- Em bancos ja populados, revise conflitos existentes antes de aplicar esta
+-- constraint, porque o Postgres rejeita a criacao se houver sobreposicao.
+create extension if not exists btree_gist with schema extensions;
+
+-- O Postgres exige que toda funcao usada numa expressao de indice/constraint
+-- seja IMMUTABLE. A expressao tstzrange(...) + make_interval(...) nao e aceita
+-- inline, entao encapsulamos o calculo numa funcao marcada como immutable.
+-- O calculo e deterministico (timestamptz + interval), entao a marcacao e correta.
+create or replace function public.appointment_slot_range(
+  when_at timestamptz,
+  duration_minutes integer
+)
+returns tstzrange
+language sql
+immutable
+as $$
+  select tstzrange(
+    when_at,
+    when_at + make_interval(mins => coalesce(nullif(duration_minutes, 0), 60)),
+    '[)'
+  );
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'appointments_active_barber_overlap_excl'
+  ) then
+    alter table public.appointments
+      add constraint appointments_active_barber_overlap_excl
+      exclude using gist (
+        coalesce(barber_id, '') with =,
+        public.appointment_slot_range(when_at, service_duration_minutes) with &&
+      )
+      where (status = 'confirmed');
+  end if;
+end $$;
+
 -- Sementes iniciais, seguras para rodar de novo.
 insert into public.services (id, name, price_cents, duration_minutes, active)
 values

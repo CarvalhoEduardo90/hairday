@@ -7,12 +7,17 @@ import "./styles/form.css"
 import dayjs from "dayjs"
 import { supabase, getAccessToken } from "./libs/supabase-client.js"
 import { apiConfig } from "./services/api-config.js"
-import { openingHours } from "./utils/opening-hours.js"
 
 const logoutButton = document.getElementById("logout")
 const accountEmail = document.getElementById("account-email")
 const upcomingList = document.getElementById("upcoming")
 const historyList = document.getElementById("history")
+
+function isValidTime(value) {
+    if (!/^\d{2}:\d{2}$/.test(value)) return false
+    const [hour, minute] = value.split(":").map(Number)
+    return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59
+}
 
 async function authFetch(path, options = {}) {
     const token = await getAccessToken()
@@ -157,23 +162,20 @@ async function cancel(schedule) {
 }
 
 async function reschedule(schedule) {
-    const current = dayjs(schedule.when).format("HH:00")
-    const input = prompt(
-        `Novo horário (formato HH:00), mesmo dia.\n` +
-            `Horários: ${openingHours.join(", ")}`,
-        current
-    )
+    const current = dayjs(schedule.when).format("HH:mm")
+    const input = prompt("Novo horario (formato HH:mm), mesmo dia.", current)
     if (!input) return
 
     const value = input.trim()
-    if (!openingHours.includes(value)) {
-        return alert("Horário inválido. Use um dos horários de funcionamento.")
+    if (!isValidTime(value)) {
+        return alert("Horario invalido. Use o formato HH:mm.")
     }
 
-    const [hour] = value.split(":")
+    const [hour, minute] = value.split(":").map(Number)
     const when = dayjs(schedule.when)
         .startOf("day")
-        .add(Number(hour), "hour")
+        .add(hour, "hour")
+        .add(minute, "minute")
         .toISOString()
 
     const response = await authFetch(`/appointments/${schedule.id}`, {

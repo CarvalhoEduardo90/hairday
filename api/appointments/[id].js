@@ -32,8 +32,13 @@ function isMissingAppointmentOptionColumn(error) {
     return (
         error?.code === "42703" ||
         error?.code === "PGRST204" ||
-        /barber_/i.test(error?.message || "")
+        /barber_|service_/i.test(error?.message || "")
     )
+}
+
+function normalizeDuration(value, fallback = 60) {
+    const duration = Number(value)
+    return Number.isInteger(duration) && duration > 0 ? duration : fallback
 }
 
 async function loadAuthorized(req, res) {
@@ -44,7 +49,9 @@ async function loadAuthorized(req, res) {
 
     let { data: appointment, error } = await supabase
         .from("appointments")
-        .select("id, when_at, status, barber_id, clients ( full_name, email, phone )")
+        .select(
+            "id, when_at, status, barber_id, service_duration_minutes, clients ( full_name, email, phone )"
+        )
         .eq("id", id)
         .maybeSingle()
 
@@ -127,6 +134,9 @@ async function reschedule(req, res) {
         when,
         barberId: appointment.barber_id || "",
         excludeAppointmentId: appointment.id,
+        serviceDurationMinutes: normalizeDuration(
+            appointment.service_duration_minutes
+        ),
     })
     if (!available) {
         return res

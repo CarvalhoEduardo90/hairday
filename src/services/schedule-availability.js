@@ -1,8 +1,15 @@
 import { apiConfig } from "./api-config.js"
 
-export async function scheduleAvailability({ date, barberId = "" }) {
+export async function scheduleAvailability({
+    date,
+    barberId = "",
+    serviceDurationMinutes = 60,
+}) {
     try {
-        const params = new URLSearchParams({ date })
+        const params = new URLSearchParams({
+            date,
+            serviceDurationMinutes: String(serviceDurationMinutes),
+        })
 
         if (barberId) {
             params.set("barberId", barberId)

@@ -18,7 +18,11 @@ export async function schedulesDay() {
     }
 
     const barber = getSelectedBarber()
-    const availability = await scheduleAvailability({ date, barberId: barber.id })
+    const availability = await scheduleAvailability({
+        date,
+        barberId: barber.id,
+        serviceDurationMinutes: service.durationMinutes,
+    })
 
     hoursLoad({ date, availability })
 }

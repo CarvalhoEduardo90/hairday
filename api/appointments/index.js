@@ -23,6 +23,7 @@ module.exports = async function handler(req, res) {
 
 function isMissingAppointmentOptionColumn(error) {
     return (
+        error?.code === "42P01" ||
         error?.code === "42703" ||
         error?.code === "PGRST204" ||
         /service_|barber_/i.test(error?.message || "")
@@ -48,7 +49,7 @@ async function list(req, res) {
         .order("when_at", { ascending: true })
 
     if (barberId) {
-        query = query.eq("barber_id", barberId)
+        query = query.or(`barber_id.eq.${barberId},barber_id.is.null`)
     }
 
     let { data, error } = await query
@@ -84,6 +85,54 @@ async function insertAppointment(payload) {
         .single()
 }
 
+function normalizeDuration(value, fallback = 60) {
+    const duration = Number(value)
+    return Number.isInteger(duration) && duration > 0 ? duration : fallback
+}
+
+async function resolveServiceSnapshot({
+    serviceId,
+    serviceName,
+    servicePriceCents,
+    serviceDurationMinutes,
+}) {
+    const fallback = {
+        id: serviceId || null,
+        name: serviceName || null,
+        priceCents: Number.isFinite(Number(servicePriceCents))
+            ? Number(servicePriceCents)
+            : null,
+        durationMinutes: normalizeDuration(serviceDurationMinutes),
+    }
+
+    if (!serviceId) return { valid: true, value: fallback }
+
+    const { data, error } = await supabase
+        .from("services")
+        .select("id, name, price_cents, duration_minutes, active")
+        .eq("id", serviceId)
+        .eq("active", true)
+        .maybeSingle()
+
+    if (error && isMissingAppointmentOptionColumn(error)) {
+        return { valid: true, value: fallback }
+    }
+    if (error) throw error
+    if (!data) {
+        return { valid: false, error: "Servico indisponivel para agendamento." }
+    }
+
+    return {
+        valid: true,
+        value: {
+            id: data.id,
+            name: data.name,
+            priceCents: data.price_cents,
+            durationMinutes: normalizeDuration(data.duration_minutes),
+        },
+    }
+}
+
 async function create(req, res) {
     const {
         fullName,
@@ -108,7 +157,21 @@ async function create(req, res) {
         return res.status(400).json({ error: validationError })
     }
 
-    const available = await isSlotAvailable({ when, barberId: barberId || "" })
+    const service = await resolveServiceSnapshot({
+        serviceId,
+        serviceName,
+        servicePriceCents,
+        serviceDurationMinutes,
+    })
+    if (!service.valid) {
+        return res.status(400).json({ error: service.error })
+    }
+
+    const available = await isSlotAvailable({
+        when,
+        barberId: barberId || "",
+        serviceDurationMinutes: service.value.durationMinutes,
+    })
     if (!available) {
         return res
             .status(409)
@@ -139,14 +202,10 @@ async function create(req, res) {
     }
     const appointmentWithOptions = {
         ...baseAppointment,
-        service_id: serviceId || null,
-        service_name: serviceName || null,
-        service_price_cents: Number.isFinite(Number(servicePriceCents))
-            ? Number(servicePriceCents)
-            : null,
-        service_duration_minutes: Number.isFinite(Number(serviceDurationMinutes))
-            ? Number(serviceDurationMinutes)
-            : null,
+        service_id: service.value.id,
+        service_name: service.value.name,
+        service_price_cents: service.value.priceCents,
+        service_duration_minutes: service.value.durationMinutes,
         barber_id: barberId || null,
         barber_name: barberName || null,
     }
@@ -186,7 +245,7 @@ async function create(req, res) {
         id: appointment.id,
         when: appointment.when_at,
         name: fullName.trim(),
-        serviceName: serviceName || null,
+        serviceName: service.value.name,
         barberName: barberName || null,
     })
 }

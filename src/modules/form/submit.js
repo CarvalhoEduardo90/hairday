@@ -55,8 +55,11 @@ form.onsubmit = async (event) => {
     }
 
     // Recupera somente a hora e insere na data selecionada.
-    const [hour] = hoursSelected.innerText.split(":")
-    const when = dayjs(selectedDate.value).add(Number(hour), "hour").toISOString()
+    const [hour, minute] = hoursSelected.innerText.split(":").map(Number)
+    const when = dayjs(selectedDate.value)
+        .add(hour, "hour")
+        .add(minute, "minute")
+        .toISOString()
 
     // Evita envio duplicado enquanto a requisição está em andamento.
     submitButton.disabled = true
