@@ -8,6 +8,26 @@
     {
       "source": "/criar-senha",
       "destination": "/criar-senha.html"
+    },
+    {
+      "source": "/api/appointments/:id",
+      "destination": "/api/appointments?id=:id"
+    },
+    {
+      "source": "/api/admin/services/:id",
+      "destination": "/api/admin/services?id=:id"
+    },
+    {
+      "source": "/api/admin/barbers/:id",
+      "destination": "/api/admin/barbers?id=:id"
+    },
+    {
+      "source": "/api/admin/availability/:id",
+      "destination": "/api/admin/availability?id=:id"
+    },
+    {
+      "source": "/api/admin/clients/:id",
+      "destination": "/api/admin/clients?id=:id"
     }
   ],
   "functions": {

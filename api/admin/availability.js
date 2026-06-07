@@ -1,10 +1,22 @@
-const { supabase } = require("../../../lib/supabase")
-const { requireAdmin } = require("../../../lib/auth")
+const { supabase } = require("../../lib/supabase")
+const { requireAdmin } = require("../../lib/auth")
 
+// /api/admin/availability        GET -> config | PUT -> salva semana | POST -> bloqueio
+// /api/admin/availability/:id    PATCH -> desativa bloqueio
+//   (a rota com :id e reescrita para ?id=:id pelo vercel.json)
 module.exports = async function handler(req, res) {
     try {
         const auth = await requireAdmin(req, res)
         if (!auth) return
+
+        const id = req.query.id
+
+        if (id) {
+            if (req.method === "PATCH") return await disableBlock(req, res, id)
+
+            res.setHeader("Allow", "PATCH")
+            return res.status(405).json({ error: "Metodo nao permitido." })
+        }
 
         if (req.method === "GET") return await getConfig(req, res)
         if (req.method === "PUT") return await saveWeeklyConfig(req, res)
@@ -118,6 +130,22 @@ async function createBlock(req, res) {
     }
 
     return res.status(201).json(toBlockDTO(data))
+}
+
+async function disableBlock(req, res, id) {
+    const { data, error } = await supabase
+        .from("schedule_blocks")
+        .update({ active: false })
+        .eq("id", id)
+        .select("id")
+        .single()
+
+    if (error) {
+        console.error(error)
+        return res.status(500).json({ error: "Erro ao desativar bloqueio." })
+    }
+
+    return res.status(200).json({ id: data.id })
 }
 
 function parseHour(hour = {}) {
