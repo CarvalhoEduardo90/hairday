@@ -13,13 +13,11 @@ module.exports = async function handler(req, res) {
         const auth = await requireAdmin(req, res)
         if (!auth) return
 
-        const { date } = req.query
-        if (!date || Number.isNaN(new Date(date).getTime())) {
-            return res.status(400).json({ error: "Parametro 'date' invalido." })
-        }
+        const { start, end, error: dateError } = getDateRange(req.query)
 
-        const start = dayjs(date).startOf("day").toISOString()
-        const end = dayjs(date).endOf("day").toISOString()
+        if (dateError) {
+            return res.status(400).json({ error: dateError })
+        }
 
         let { data, error } = await fetchAppointments({
             start,
@@ -51,6 +49,7 @@ module.exports = async function handler(req, res) {
             email: row.clients?.email ?? "",
             phone: row.clients?.phone ?? "",
             serviceName: row.service_name ?? "",
+            servicePriceCents: row.service_price_cents ?? null,
             barberName: row.barber_name ?? "",
             category: categorize(
                 {
@@ -68,9 +67,45 @@ module.exports = async function handler(req, res) {
     }
 }
 
+function getDateRange(query) {
+    if (query.date && !Number.isNaN(new Date(query.date).getTime())) {
+        return {
+            start: dayjs(query.date).startOf("day").toISOString(),
+            end: dayjs(query.date).endOf("day").toISOString(),
+            error: null,
+        }
+    }
+
+    if (
+        query.start &&
+        query.end &&
+        !Number.isNaN(new Date(query.start).getTime()) &&
+        !Number.isNaN(new Date(query.end).getTime())
+    ) {
+        const startDate = dayjs(query.start).startOf("day")
+        const endDate = dayjs(query.end).endOf("day")
+
+        if (endDate.isBefore(startDate)) {
+            return {
+                start: null,
+                end: null,
+                error: "Periodo invalido: a data final deve ser maior ou igual a inicial.",
+            }
+        }
+
+        return {
+            start: startDate.toISOString(),
+            end: endDate.toISOString(),
+            error: null,
+        }
+    }
+
+    return { start: null, end: null, error: "Periodo invalido." }
+}
+
 function fetchAppointments({ start, end, includeOptions }) {
     const optionFields = includeOptions
-        ? ", service_name, barber_name"
+        ? ", service_name, service_price_cents, barber_name"
         : ""
 
     return supabase

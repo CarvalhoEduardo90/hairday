@@ -12,45 +12,260 @@
     />
 
     <link rel="icon" href="./src/assets/scissors.svg" />
-    <title>Hair Day — Painel</title>
+    <title>Hair Day - Painel</title>
 
     <style>
       .admin {
-        max-width: 50rem;
+        max-width: 76rem;
         margin: 0 auto;
-        padding: 2rem 1.5rem;
+        padding: 2rem 1.5rem 3rem;
       }
-      .admin-top {
+
+      .admin-top,
+      .admin-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 2rem;
+        gap: 1rem;
       }
+
+      .admin-top {
+        margin-bottom: 1.5rem;
+      }
+
       .admin-top img.logo-img {
         height: 2.5rem;
       }
-      .admin-nav {
+
+      .admin-nav,
+      .admin-actions {
         display: flex;
         align-items: center;
         gap: 0.75rem;
+        flex-wrap: wrap;
       }
-      .admin-logout {
-        background: none;
-        border: 1px solid #2e2c30;
-        color: #f5f4f5;
+
+      .admin-logout,
+      .admin-action {
+        height: 2.75rem;
+        border: 1px solid #3e3c41;
         border-radius: 0.5rem;
-        padding: 0.5rem 1rem;
+        padding: 0 1rem;
+        background: #232225;
+        color: #f5f4f5;
         cursor: pointer;
-        font-family: inherit;
-        font-size: 0.9rem;
+        font: inherit;
         text-decoration: none;
         display: inline-flex;
         align-items: center;
       }
-      .admin-logout:hover {
+
+      .admin-logout:hover,
+      .admin-action:hover {
         background-color: #2e2c30;
       }
+
+      .admin-action:disabled,
+      .calendar-nav button:disabled {
+        opacity: 0.55;
+        cursor: wait;
+      }
+
+      .admin-action-primary {
+        background: #b8952e;
+        border-color: #b8952e;
+        color: #050505;
+        font-weight: 700;
+      }
+
+      .admin-header {
+        align-items: flex-end;
+        margin-bottom: 1.5rem;
+      }
+
+      .admin-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .admin-header p {
+        color: #98959d;
+        font-size: 0.9rem;
+      }
+
+      .admin-dashboard {
+        display: grid;
+        grid-template-columns: minmax(21rem, 26rem) minmax(0, 1fr);
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .admin-panel {
+        background: #232225;
+        border: 1px solid #2e2c30;
+        border-radius: 0.75rem;
+      }
+
+      .calendar-panel {
+        padding: 1rem;
+      }
+
+      .calendar-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+
+      .calendar-toolbar strong {
+        font-size: 1.1rem;
+        text-transform: capitalize;
+      }
+
+      .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .calendar-nav button {
+        width: 2.35rem;
+        height: 2.35rem;
+        border: 1px solid #3e3c41;
+        border-radius: 0.5rem;
+        background: #2e2c30;
+        color: #f5f4f5;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .calendar-weekdays,
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 0.35rem;
+      }
+
+      .calendar-weekdays {
+        margin-bottom: 0.5rem;
+        color: #98959d;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .calendar-day {
+        min-height: 4.25rem;
+        border: 1px solid #3e3c41;
+        border-radius: 0.5rem;
+        padding: 0.45rem;
+        background: #19181b;
+        color: #f5f4f5;
+        cursor: pointer;
+        font: inherit;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+
+      .calendar-day:hover,
+      .calendar-day-selected {
+        border-color: #b8952e;
+      }
+
+      .calendar-day-muted {
+        opacity: 0.35;
+      }
+
+      .calendar-day-today .calendar-number {
+        color: #b8952e;
+        font-weight: 700;
+      }
+
+      .calendar-number {
+        font-size: 0.9rem;
+      }
+
+      .calendar-count {
+        min-width: 1.5rem;
+        height: 1.5rem;
+        border-radius: 999px;
+        padding: 0 0.4rem;
+        background: #b8952e;
+        color: #19181b;
+        font-size: 0.75rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .calendar-empty-count {
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 999px;
+        background: #3e3c41;
+      }
+
+      .day-panel {
+        overflow: hidden;
+      }
+
+      .day-panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.25rem;
+        border-bottom: 1px solid #2e2c30;
+      }
+
+      .day-panel-header h2 {
+        font-size: 1.35rem;
+      }
+
+      .day-panel-header p {
+        color: #98959d;
+        font-size: 0.9rem;
+      }
+
+      .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #2e2c30;
+      }
+
+      .admin-stat {
+        min-height: 4.5rem;
+        border: 1px solid #3e3c41;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        background: #19181b;
+      }
+
+      .admin-stat span {
+        display: block;
+        color: #98959d;
+        font-size: 0.8rem;
+      }
+
+      .admin-stat strong {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 1.2rem;
+      }
+
+      .day-schedules {
+        padding: 1.25rem;
+      }
+
       .badge {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
         font-size: 0.7rem;
         font-weight: 700;
         padding: 0.15rem 0.5rem;
@@ -60,49 +275,84 @@
         white-space: nowrap;
         margin-right: 0.75rem;
       }
+
       .badge-avulso {
         background: #3e3c41;
         color: #b2afb6;
       }
+
       .badge-cadastrado {
         background: #243b53;
         color: #9ec5ff;
       }
+
       .badge-assinante {
         background: #b8952e;
         color: #19181b;
       }
-      .admin-controls {
-        margin-bottom: 1.5rem;
-        max-width: 16rem;
-      }
+
       .schedule-period ul li .item-name {
         flex: 1 1 6rem;
       }
+
       .item-actions {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        /* Empurra as ações para a direita; quebram para baixo se faltar espaço. */
         margin-left: auto;
       }
+
       .item-actions button {
         background: none;
         border: none;
         color: #b8952e;
         cursor: pointer;
-        font-family: inherit;
+        font: inherit;
         font-size: 0.87rem;
         text-decoration: underline;
-        /* Alvo de toque mais confortável no mobile. */
-        padding: 0.5rem 0.5rem;
+        padding: 0.5rem;
       }
+
       .item-actions button:hover {
         color: #dbc170;
       }
+
       .empty {
         color: #98959d;
         font-size: 0.87rem;
+      }
+
+      @media (max-width: 900px) {
+        .admin-top,
+        .admin-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .admin-dashboard {
+          grid-template-columns: 1fr;
+        }
+
+        .admin-stats {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .admin {
+          padding: 1rem;
+        }
+
+        .calendar-day {
+          min-height: 3.5rem;
+          padding: 0.35rem;
+        }
+
+        .calendar-count {
+          min-width: 1.25rem;
+          height: 1.25rem;
+          font-size: 0.7rem;
+        }
       }
     </style>
   </head>
@@ -116,47 +366,100 @@
         </div>
       </div>
 
-      <header style="margin-bottom: 1.5rem">
-        <h1>Agendamentos</h1>
-        <p style="color: #98959d; font-size: 0.87rem">
-          Gerencie os agendamentos do dia selecionado
-        </p>
+      <header class="admin-header">
+        <div>
+          <h1>Agenda da barbearia</h1>
+          <p>Veja o mes inteiro e clique em um dia para gerenciar os horarios.</p>
+        </div>
+        <div class="admin-actions">
+          <button type="button" class="admin-action" id="today-button">Hoje</button>
+          <a href="index.html" class="admin-action admin-action-primary">
+            Novo agendamento
+          </a>
+        </div>
       </header>
 
-      <div class="admin-controls">
-        <label for="date" class="label">Data</label>
-        <div class="input">
-          <i><img src="./src/assets/calendar.svg" alt="Calendário" /></i>
-          <input type="date" id="date" name="date" required />
-        </div>
+      <input type="date" id="date" name="date" hidden />
+
+      <div class="admin-dashboard">
+        <section class="admin-panel calendar-panel" aria-label="Calendario mensal">
+          <div class="calendar-toolbar">
+            <strong id="calendar-month">Mes</strong>
+            <div class="calendar-nav">
+              <button type="button" id="prev-month" aria-label="Mes anterior">
+                &lt;
+              </button>
+              <button type="button" id="next-month" aria-label="Proximo mes">
+                &gt;
+              </button>
+            </div>
+          </div>
+
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Dom</span>
+            <span>Seg</span>
+            <span>Ter</span>
+            <span>Qua</span>
+            <span>Qui</span>
+            <span>Sex</span>
+            <span>Sab</span>
+          </div>
+          <div id="calendar-grid" class="calendar-grid"></div>
+        </section>
+
+        <section class="admin-panel day-panel">
+          <header class="day-panel-header">
+            <div>
+              <h2 id="selected-day-title">Hoje</h2>
+              <p id="selected-day-meta">Agendamentos do dia selecionado</p>
+            </div>
+          </header>
+
+          <div class="admin-stats">
+            <div class="admin-stat">
+              <span>Agendamentos no dia</span>
+              <strong id="day-count">0</strong>
+            </div>
+            <div class="admin-stat">
+              <span>Total no mes</span>
+              <strong id="month-count">0</strong>
+            </div>
+            <div class="admin-stat">
+              <span>Receita prevista</span>
+              <strong id="day-revenue">R$ 0,00</strong>
+            </div>
+          </div>
+
+          <div class="day-schedules">
+            <section class="schedule-period">
+              <header>
+                <img src="./src/assets/morning.svg" alt="Manha" />
+                <strong>Manha</strong>
+                <span>09h-12h</span>
+              </header>
+              <ul id="period-morning" class="period"></ul>
+            </section>
+
+            <section class="schedule-period">
+              <header>
+                <img src="./src/assets/afternoon.svg" alt="Tarde" />
+                <strong>Tarde</strong>
+                <span>13h-18h</span>
+              </header>
+              <ul id="period-afternoon" class="period"></ul>
+            </section>
+
+            <section class="schedule-period">
+              <header>
+                <img src="./src/assets/night.svg" alt="Noite" />
+                <strong>Noite</strong>
+                <span>19h-21h</span>
+              </header>
+              <ul id="period-night" class="period"></ul>
+            </section>
+          </div>
+        </section>
       </div>
-
-      <section class="schedule-period">
-        <header>
-          <img src="./src/assets/morning.svg" alt="Manhã" />
-          <strong>Manhã</strong>
-          <span>09h-12h</span>
-        </header>
-        <ul id="period-morning" class="period"></ul>
-      </section>
-
-      <section class="schedule-period">
-        <header>
-          <img src="./src/assets/afternoon.svg" alt="Tarde" />
-          <strong>Tarde</strong>
-          <span>13h-18h</span>
-        </header>
-        <ul id="period-afternoon" class="period"></ul>
-      </section>
-
-      <section class="schedule-period">
-        <header>
-          <img src="./src/assets/night.svg" alt="Noite" />
-          <strong>Noite</strong>
-          <span>19h-21h</span>
-        </header>
-        <ul id="period-night" class="period"></ul>
-      </section>
     </main>
   </body>
 </html>

@@ -72,6 +72,10 @@
   flex: 1;
 }
 
+.schedule-period ul li .badge {
+  flex: 0 0 auto;
+}
+
 .schedule-period ul li .item-details {
   flex-basis: 100%;
   margin-left: 4.5rem;

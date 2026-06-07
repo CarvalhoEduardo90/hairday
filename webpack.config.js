@@ -1,7 +1,22 @@
 const path = require("path");
+const fs = require("fs");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopywebpackPlugin = require("copy-webpack-plugin");
+
+const envPath = path.resolve(__dirname, ".env");
+if (fs.existsSync(envPath)) {
+    const envLines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
+    envLines.forEach((line) => {
+        const match = line.match(/^([A-Za-z0-9_]+)=(.*)$/);
+        if (!match) return;
+
+        const [, key, value] = match;
+        if (!process.env[key]) {
+            process.env[key] = value;
+        }
+    });
+}
 
 module.exports = {
     target: "web",
