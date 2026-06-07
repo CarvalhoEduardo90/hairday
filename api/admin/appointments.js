@@ -3,13 +3,11 @@ const { supabase } = require("../../lib/supabase")
 const { requireAdmin } = require("../../lib/auth")
 const { getAccountEmails, categorize } = require("../../lib/accounts")
 
-// /api/admin/appointments?date=YYYY-MM-DD
-//   GET (admin) -> lista completa dos agendamentos do dia, COM nome/contato.
 module.exports = async function handler(req, res) {
     try {
         if (req.method !== "GET") {
             res.setHeader("Allow", "GET")
-            return res.status(405).json({ error: "Método não permitido." })
+            return res.status(405).json({ error: "Metodo nao permitido." })
         }
 
         const auth = await requireAdmin(req, res)
@@ -17,19 +15,27 @@ module.exports = async function handler(req, res) {
 
         const { date } = req.query
         if (!date || Number.isNaN(new Date(date).getTime())) {
-            return res.status(400).json({ error: "Parâmetro 'date' inválido." })
+            return res.status(400).json({ error: "Parametro 'date' invalido." })
         }
 
         const start = dayjs(date).startOf("day").toISOString()
         const end = dayjs(date).endOf("day").toISOString()
 
-        const { data, error } = await supabase
-            .from("appointments")
-            .select("id, when_at, clients ( full_name, email, phone, is_subscriber )")
-            .gte("when_at", start)
-            .lte("when_at", end)
-            .eq("status", "confirmed")
-            .order("when_at", { ascending: true })
+        let { data, error } = await fetchAppointments({
+            start,
+            end,
+            includeOptions: true,
+        })
+
+        if (error && isMissingAppointmentOptionColumn(error)) {
+            const fallback = await fetchAppointments({
+                start,
+                end,
+                includeOptions: false,
+            })
+            data = fallback.data
+            error = fallback.error
+        }
 
         if (error) {
             console.error(error)
@@ -44,6 +50,8 @@ module.exports = async function handler(req, res) {
             name: row.clients?.full_name ?? "",
             email: row.clients?.email ?? "",
             phone: row.clients?.phone ?? "",
+            serviceName: row.service_name ?? "",
+            barberName: row.barber_name ?? "",
             category: categorize(
                 {
                     email: row.clients?.email,
@@ -58,4 +66,28 @@ module.exports = async function handler(req, res) {
         console.error(error)
         return res.status(500).json({ error: "Erro interno no servidor." })
     }
+}
+
+function fetchAppointments({ start, end, includeOptions }) {
+    const optionFields = includeOptions
+        ? ", service_name, barber_name"
+        : ""
+
+    return supabase
+        .from("appointments")
+        .select(
+            `id, when_at${optionFields}, clients ( full_name, email, phone, is_subscriber )`
+        )
+        .gte("when_at", start)
+        .lte("when_at", end)
+        .eq("status", "confirmed")
+        .order("when_at", { ascending: true })
+}
+
+function isMissingAppointmentOptionColumn(error) {
+    return (
+        error?.code === "42703" ||
+        error?.code === "PGRST204" ||
+        /service_|barber_/i.test(error?.message || "")
+    )
 }

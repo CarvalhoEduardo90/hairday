@@ -14,8 +14,7 @@ create table if not exists public.clients (
   constraint clients_email_unique unique (email)
 );
 
--- Assinatura: o admin marca/desmarca quem é assinante (direito a 1 corte/semana).
--- Idempotente: pode rodar de novo num banco já existente sem erro.
+-- Assinatura: o admin marca/desmarca quem e assinante.
 alter table public.clients
   add column if not exists is_subscriber boolean not null default false;
 
@@ -24,28 +23,49 @@ create table if not exists public.appointments (
   id          uuid primary key default gen_random_uuid(),
   client_id   uuid not null references public.clients (id) on delete cascade,
   when_at     timestamptz not null,
+  service_id  text,
+  service_name text,
+  service_price_cents integer,
+  service_duration_minutes integer,
+  barber_id   text,
+  barber_name text,
   -- confirmed | cancelled
   status      text not null default 'confirmed'
               check (status in ('confirmed', 'cancelled')),
   created_at  timestamptz not null default now()
 );
 
--- Impede DOIS agendamentos ativos no mesmo horário (checagem atômica no banco).
--- Agendamentos cancelados liberam o horário.
-create unique index if not exists appointments_active_slot_unique
-  on public.appointments (when_at)
+-- Idempotente: adiciona os campos em bancos que ja existem.
+alter table public.appointments
+  add column if not exists service_id text,
+  add column if not exists service_name text,
+  add column if not exists service_price_cents integer,
+  add column if not exists service_duration_minutes integer,
+  add column if not exists barber_id text,
+  add column if not exists barber_name text;
+
+-- Impede conflito de agenda por profissional.
+-- Enquanto houver apenas um barbeiro/sem preferencia, barber_id nulo continua
+-- funcionando como a agenda unica atual. Com varios barbeiros, cada barber_id
+-- pode ter a propria agenda no mesmo horario.
+drop index if exists appointments_active_slot_unique;
+create unique index if not exists appointments_active_slot_barber_unique
+  on public.appointments (coalesce(barber_id, ''), when_at)
   where status = 'confirmed';
 
 -- Acelera a busca por dia.
 create index if not exists appointments_when_idx
   on public.appointments (when_at);
 
+-- Acelera filtros futuros por barbeiro.
+create index if not exists appointments_barber_when_idx
+  on public.appointments (barber_id, when_at);
+
 -- ============================================================
 -- Row Level Security (RLS)
--- As Serverless Functions usam a chave service_role, que IGNORA o RLS.
--- Mantemos RLS ativo e SEM políticas públicas para que o banco não fique
--- exposto caso a chave anon seja usada no front-end (Fase 3 adiciona as
--- políticas por usuário autenticado).
+-- As Serverless Functions usam a chave service_role, que ignora o RLS.
+-- Mantemos RLS ativo e sem politicas publicas para que o banco nao fique
+-- exposto caso a chave anon seja usada no front-end.
 -- ============================================================
 alter table public.clients      enable row level security;
 alter table public.appointments enable row level security;
@@ -53,8 +73,7 @@ alter table public.appointments enable row level security;
 -- ============================================================
 -- Ao criar uma conta (sign-up), cria/atualiza o registro de cliente
 -- a partir dos metadados (full_name, phone) enviados pelo front.
--- Assim o cliente já aparece na lista do admin mesmo sem ter agendado.
--- Idempotente: pode rodar de novo sem erro.
+-- Assim o cliente ja aparece na lista do admin mesmo sem ter agendado.
 -- ============================================================
 create or replace function public.handle_new_user()
 returns trigger

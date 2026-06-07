@@ -1,16 +1,24 @@
 import { scheduleFetchByDay } from "../../services/schedule-fetch-by-day.js"
 import { hoursLoad } from "../form/hours-load.js"
+import { getSelectedBarber, getSelectedService } from "../form/service-select.js"
 
-// Seleciona o input de data para obter a data selecionada pelo usuário
 const selectedDate = document.getElementById("date")
 
 export async function schedulesDay() {
-    // Obtem a data do input.
     const date = selectedDate.value
+    const service = getSelectedService()
 
-    // Busca na API a disponibilidade do dia (somente horários ocupados).
-    const dailySchedules = await scheduleFetchByDay({ date })
+    if (!service) {
+        hoursLoad({
+            date,
+            dailySchedules: [],
+            message: "Escolha um servico para ver os horarios.",
+        })
+        return
+    }
 
-    // Renderiza as horas disponíveis no formulário (desabilita as ocupadas).
+    const barber = getSelectedBarber()
+    const dailySchedules = await scheduleFetchByDay({ date, barberId: barber.id })
+
     hoursLoad({ date, dailySchedules })
 }

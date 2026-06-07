@@ -72,6 +72,13 @@
   flex: 1;
 }
 
+.schedule-period ul li .item-details {
+  flex-basis: 100%;
+  margin-left: 4.5rem;
+  color: #98959d;
+  font-size: 0.82rem;
+}
+
 .hour-empty {
   color: #807d84;
   font-size: 0.87rem;

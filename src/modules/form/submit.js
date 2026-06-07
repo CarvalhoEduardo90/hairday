@@ -3,6 +3,11 @@ import dayjs from "dayjs"
 import { scheduleNew } from "../../services/schedule-new.js"
 import { schedulesDay } from "../schedules/load.js"
 import { isValidEmail, isValidPhone } from "../../utils/validation.js"
+import {
+    getSelectedBarber,
+    getSelectedService,
+    resetServiceSelection,
+} from "./service-select.js"
 
 const form = document.querySelector("form")
 const clientName = document.getElementById("client")
@@ -26,6 +31,12 @@ form.onsubmit = async (event) => {
     const name = clientName.value.trim()
     const email = clientEmail.value.trim()
     const phone = clientPhone.value.trim()
+    const service = getSelectedService()
+    const barber = getSelectedBarber()
+
+    if (!service) {
+        return alert("Por favor, selecione um servico.")
+    }
 
     if (!name) {
         return alert("Por favor, insira o nome completo do cliente.")
@@ -52,15 +63,16 @@ form.onsubmit = async (event) => {
 
     try {
         // Faz o agendamento.
-        await scheduleNew({ name, email, phone, when })
+        await scheduleNew({ name, email, phone, when, service, barber })
 
         // Exibe uma mensagem de sucesso para o usuário.
         alert("Agendamento realizado com sucesso!")
 
         // Recarrega os agendamentos e limpa o formulário.
-        await schedulesDay()
         form.reset()
         selectedDate.value = inputToday
+        resetServiceSelection()
+        await schedulesDay()
     } catch (error) {
         console.log(error)
         alert(error.message || "Não foi possível realizar o agendamento.")

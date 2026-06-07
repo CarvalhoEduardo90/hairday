@@ -94,6 +94,12 @@ function render(schedules) {
         name.classList.add("item-name")
         name.textContent = schedule.name
 
+        const details = document.createElement("small")
+        details.classList.add("item-details")
+        details.textContent = [schedule.serviceName, schedule.barberName]
+            .filter(Boolean)
+            .join(" - ")
+
         const badge = document.createElement("span")
         badge.classList.add("badge", `badge-${schedule.category}`)
         badge.textContent = categoryLabel(schedule.category)
@@ -114,7 +120,13 @@ function render(schedules) {
         cancelBtn.addEventListener("click", () => cancelAppointment(schedule))
 
         actions.append(rescheduleBtn, cancelBtn)
-        item.append(time, name, badge, actions)
+        item.append(time, name)
+
+        if (details.textContent) {
+            item.append(details)
+        }
+
+        item.append(badge, actions)
 
         const hour = dayjs(schedule.when).hour()
         if (hour <= 12) {
