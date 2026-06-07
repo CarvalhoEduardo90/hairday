@@ -18,6 +18,27 @@ create table if not exists public.clients (
 alter table public.clients
   add column if not exists is_subscriber boolean not null default false;
 
+-- Catalogo de servicos oferecidos.
+create table if not exists public.services (
+  id          text primary key,
+  name        text not null,
+  price_cents integer not null default 0 check (price_cents >= 0),
+  duration_minutes integer not null default 30 check (duration_minutes > 0),
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+-- Profissionais da barbearia.
+create table if not exists public.barbers (
+  id          text primary key,
+  name        text not null,
+  phone       text not null default '',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
 -- Tabela de agendamentos.
 create table if not exists public.appointments (
   id          uuid primary key default gen_random_uuid(),
@@ -61,6 +82,22 @@ create index if not exists appointments_when_idx
 create index if not exists appointments_barber_when_idx
   on public.appointments (barber_id, when_at);
 
+-- Sementes iniciais, seguras para rodar de novo.
+insert into public.services (id, name, price_cents, duration_minutes, active)
+values
+  ('corte-social', 'Corte social', 3500, 40, true),
+  ('barba', 'Barba', 2500, 30, true),
+  ('corte-barba', 'Corte + barba', 5500, 60, true),
+  ('hidratacao', 'Hidratacao', 4500, 45, true),
+  ('botox', 'Botox capilar', 9000, 90, true)
+on conflict (id) do nothing;
+
+insert into public.barbers (id, name, phone, active)
+values
+  ('barbeiro-joao', 'Joao', '', true),
+  ('barbeiro-marcos', 'Marcos', '', true)
+on conflict (id) do nothing;
+
 -- ============================================================
 -- Row Level Security (RLS)
 -- As Serverless Functions usam a chave service_role, que ignora o RLS.
@@ -69,6 +106,8 @@ create index if not exists appointments_barber_when_idx
 -- ============================================================
 alter table public.clients      enable row level security;
 alter table public.appointments enable row level security;
+alter table public.services     enable row level security;
+alter table public.barbers      enable row level security;
 
 -- ============================================================
 -- Ao criar uma conta (sign-up), cria/atualiza o registro de cliente

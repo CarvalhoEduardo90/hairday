@@ -148,6 +148,12 @@
   white-space: nowrap;
 }
 
+.service-empty {
+  color: #98959d;
+  font-size: 0.9rem;
+  padding: 0.75rem 0;
+}
+
 .service-option:hover,
 .service-option-selected {
   border-color: #b8952e;
