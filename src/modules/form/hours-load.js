@@ -1,10 +1,8 @@
-import dayjs from "dayjs"
-import { openingHours } from "../../utils/opening-hours.js"
 import { hoursClick } from "./hours-click.js"
 
 const hours = document.getElementById("hours")
 
-export function hoursLoad({ date, dailySchedules, message = "" }) {
+export function hoursLoad({ availability = [], message = "" }) {
     hours.innerHTML = ""
 
     if (message) {
@@ -15,28 +13,22 @@ export function hoursLoad({ date, dailySchedules, message = "" }) {
         return
     }
 
-    const unavailableHours = dailySchedules.map((schedule) =>
-        dayjs(schedule.when).format("HH:mm")
-    )
+    if (availability.length === 0) {
+        const li = document.createElement("li")
+        li.classList.add("hour-empty")
+        li.textContent = "Nenhum horario disponivel para esta data."
+        hours.appendChild(li)
+        return
+    }
 
-    const opening = openingHours.map((hour) => {
-        const [scheduleHour] = hour.split(":")
-        const isHourPast = dayjs(date).add(scheduleHour, "hour").isBefore(dayjs())
-        const available = !unavailableHours.includes(hour) && !isHourPast
+    let currentPeriod = ""
 
-        return {
-            hour,
-            available,
-        }
-    })
+    availability.forEach(({ hour, available }) => {
+        const period = periodLabel(hour)
 
-    opening.forEach(({ hour, available }) => {
-        if (hour === "09:00") {
-            hourHeaderAdd("Manha")
-        } else if (hour === "13:00") {
-            hourHeaderAdd("Tarde")
-        } else if (hour === "18:00") {
-            hourHeaderAdd("Noite")
+        if (period !== currentPeriod) {
+            currentPeriod = period
+            hourHeaderAdd(period)
         }
 
         const li = document.createElement("li")
@@ -55,4 +47,12 @@ function hourHeaderAdd(title) {
     header.classList.add("hour-period")
     header.textContent = title
     hours.appendChild(header)
+}
+
+function periodLabel(hour) {
+    const [value] = hour.split(":").map(Number)
+
+    if (value < 13) return "Manha"
+    if (value < 18) return "Tarde"
+    return "Noite"
 }

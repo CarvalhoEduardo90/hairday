@@ -39,6 +39,41 @@ create table if not exists public.barbers (
   updated_at  timestamptz not null default now()
 );
 
+-- Horario semanal de funcionamento.
+create table if not exists public.business_hours (
+  day_of_week integer primary key check (day_of_week between 0 and 6),
+  opens_at    time not null default '09:00',
+  closes_at   time not null default '18:00',
+  slot_interval_minutes integer not null default 60 check (slot_interval_minutes > 0),
+  active      boolean not null default true,
+  updated_at  timestamptz not null default now(),
+  check (opens_at < closes_at)
+);
+
+-- Pausas recorrentes, como almoco.
+create table if not exists public.business_breaks (
+  id          uuid primary key default gen_random_uuid(),
+  day_of_week integer not null check (day_of_week between 0 and 6),
+  starts_at   time not null,
+  ends_at     time not null,
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  check (starts_at < ends_at)
+);
+
+-- Bloqueios pontuais para ausencias, feriados ou manutencao.
+create table if not exists public.schedule_blocks (
+  id          uuid primary key default gen_random_uuid(),
+  block_date  date not null,
+  starts_at   time not null,
+  ends_at     time not null,
+  barber_id   text references public.barbers (id) on delete set null,
+  reason      text not null default '',
+  active      boolean not null default true,
+  created_at  timestamptz not null default now(),
+  check (starts_at < ends_at)
+);
+
 -- Tabela de agendamentos.
 create table if not exists public.appointments (
   id          uuid primary key default gen_random_uuid(),
@@ -98,6 +133,29 @@ values
   ('barbeiro-marcos', 'Marcos', '', true)
 on conflict (id) do nothing;
 
+insert into public.business_hours
+  (day_of_week, opens_at, closes_at, slot_interval_minutes, active)
+values
+  (0, '09:00', '12:00', 60, false),
+  (1, '09:00', '18:00', 60, true),
+  (2, '09:00', '18:00', 60, true),
+  (3, '09:00', '18:00', 60, true),
+  (4, '09:00', '18:00', 60, true),
+  (5, '09:00', '18:00', 60, true),
+  (6, '09:00', '14:00', 60, true)
+on conflict (day_of_week) do nothing;
+
+insert into public.business_breaks (day_of_week, starts_at, ends_at, active)
+select day_of_week, '12:00'::time, '13:00'::time, true
+from generate_series(1, 5) as days(day_of_week)
+where not exists (
+  select 1
+  from public.business_breaks b
+  where b.day_of_week = days.day_of_week
+    and b.starts_at = '12:00'::time
+    and b.ends_at = '13:00'::time
+);
+
 -- ============================================================
 -- Row Level Security (RLS)
 -- As Serverless Functions usam a chave service_role, que ignora o RLS.
@@ -108,6 +166,9 @@ alter table public.clients      enable row level security;
 alter table public.appointments enable row level security;
 alter table public.services     enable row level security;
 alter table public.barbers      enable row level security;
+alter table public.business_hours enable row level security;
+alter table public.business_breaks enable row level security;
+alter table public.schedule_blocks enable row level security;
 
 -- ============================================================
 -- Ao criar uma conta (sign-up), cria/atualiza o registro de cliente

@@ -8,6 +8,7 @@ const {
     sendCancellationWhatsApp,
     sendRescheduleWhatsApp,
 } = require("../../lib/whatsapp")
+const { isSlotAvailable } = require("../../lib/availability")
 
 // /api/appointments/:id
 //   DELETE -> cancela (admin OU o cliente dono do agendamento)
@@ -27,17 +28,36 @@ module.exports = async function handler(req, res) {
 
 // Carrega o agendamento confirmado e garante que o usuário tem permissão
 // (admin ou dono). Retorna o agendamento ou null (já tendo respondido o erro).
+function isMissingAppointmentOptionColumn(error) {
+    return (
+        error?.code === "42703" ||
+        error?.code === "PGRST204" ||
+        /barber_/i.test(error?.message || "")
+    )
+}
+
 async function loadAuthorized(req, res) {
     const auth = await requireAuth(req, res)
     if (!auth) return null
 
     const { id } = req.query
 
-    const { data: appointment, error } = await supabase
+    let { data: appointment, error } = await supabase
         .from("appointments")
-        .select("id, when_at, status, clients ( full_name, email, phone )")
+        .select("id, when_at, status, barber_id, clients ( full_name, email, phone )")
         .eq("id", id)
         .maybeSingle()
+
+    if (error && isMissingAppointmentOptionColumn(error)) {
+        const fallback = await supabase
+            .from("appointments")
+            .select("id, when_at, status, clients ( full_name, email, phone )")
+            .eq("id", id)
+            .maybeSingle()
+
+        appointment = fallback.data
+        error = fallback.error
+    }
 
     if (error) {
         console.error(error)
@@ -101,6 +121,17 @@ async function reschedule(req, res) {
     const { when } = req.body || {}
     if (!when || Number.isNaN(new Date(when).getTime())) {
         return res.status(400).json({ error: "Novo horário inválido." })
+    }
+
+    const available = await isSlotAvailable({
+        when,
+        barberId: appointment.barber_id || "",
+        excludeAppointmentId: appointment.id,
+    })
+    if (!available) {
+        return res
+            .status(409)
+            .json({ error: "Este horario nao esta disponivel. Escolha outro." })
     }
 
     const { data, error } = await supabase

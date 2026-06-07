@@ -32,6 +32,7 @@ const views = {
     agenda: document.getElementById("agenda-view"),
     services: document.getElementById("services-view"),
     barbers: document.getElementById("barbers-view"),
+    availability: document.getElementById("availability-view"),
 }
 const serviceForm = document.getElementById("service-form")
 const serviceFormTitle = document.getElementById("service-form-title")
@@ -50,6 +51,18 @@ const barberPhone = document.getElementById("barber-phone")
 const barberActive = document.getElementById("barber-active")
 const barberCancel = document.getElementById("barber-cancel")
 const barbersList = document.getElementById("barbers-list")
+const availabilityForm = document.getElementById("availability-form")
+const availabilityDays = document.getElementById("availability-days")
+const breakActive = document.getElementById("break-active")
+const breakStart = document.getElementById("break-start")
+const breakEnd = document.getElementById("break-end")
+const blockForm = document.getElementById("block-form")
+const blockDate = document.getElementById("block-date")
+const blockStart = document.getElementById("block-start")
+const blockEnd = document.getElementById("block-end")
+const blockBarber = document.getElementById("block-barber")
+const blockReason = document.getElementById("block-reason")
+const blocksList = document.getElementById("blocks-list")
 
 let currentMonth = dayjs().startOf("month")
 let selectedDay = dayjs()
@@ -57,8 +70,19 @@ let monthSchedules = []
 let loadRequestId = 0
 let servicesLoaded = false
 let barbersLoaded = false
+let availabilityLoaded = false
 let servicesCache = []
 let barbersCache = []
+let availabilityCache = null
+const weekDays = [
+    "Domingo",
+    "Segunda",
+    "Terca",
+    "Quarta",
+    "Quinta",
+    "Sexta",
+    "Sabado",
+]
 const viewCopy = {
     agenda: {
         title: "Agenda da barbearia",
@@ -71,6 +95,10 @@ const viewCopy = {
     barbers: {
         title: "Barbeiros",
         subtitle: "Cadastre profissionais e controle quem aparece para o cliente.",
+    },
+    availability: {
+        title: "Horarios",
+        subtitle: "Configure expediente, almoco e bloqueios pontuais da agenda.",
     },
 }
 
@@ -390,6 +418,9 @@ function switchView(name) {
     if (name === "barbers" && !barbersLoaded) {
         loadBarbers()
     }
+    if (name === "availability" && !availabilityLoaded) {
+        loadAvailability()
+    }
 }
 
 function setSubmitLoading(form, loading) {
@@ -575,6 +606,302 @@ async function loadBarbers() {
     }
 }
 
+async function loadAvailability() {
+    availabilityDays.innerHTML = "<p class='empty'>Carregando horarios...</p>"
+    blocksList.innerHTML = "<li class='empty'>Carregando bloqueios...</li>"
+
+    try {
+        if (!barbersLoaded) {
+            await loadBarbers()
+        }
+
+        const response = await authFetch("/admin/availability")
+        if (!response.ok) {
+            availabilityDays.innerHTML =
+                "<p class='empty'>Nao foi possivel carregar os horarios. Verifique se o schema foi aplicado.</p>"
+            blocksList.innerHTML = "<li class='empty'>Sem dados.</li>"
+            return
+        }
+
+        availabilityLoaded = true
+        availabilityCache = await response.json()
+        renderAvailability()
+    } catch (error) {
+        console.log(error)
+        availabilityDays.innerHTML =
+            "<p class='empty'>Nao foi possivel carregar os horarios.</p>"
+        blocksList.innerHTML = "<li class='empty'>Nao foi possivel carregar.</li>"
+    }
+}
+
+function defaultHours() {
+    return weekDays.map((_, dayOfWeek) => ({
+        dayOfWeek,
+        opensAt: dayOfWeek === 0 ? "09:00" : "09:00",
+        closesAt: dayOfWeek === 0 ? "12:00" : dayOfWeek === 6 ? "14:00" : "18:00",
+        slotIntervalMinutes: 60,
+        active: dayOfWeek !== 0,
+    }))
+}
+
+function renderAvailability() {
+    const hours = availabilityCache?.hours?.length
+        ? availabilityCache.hours
+        : defaultHours()
+
+    renderAvailabilityDays(hours)
+    renderBreaks(availabilityCache?.breaks || [])
+    renderBlockBarberOptions()
+    renderBlocks(availabilityCache?.blocks || [])
+}
+
+function renderAvailabilityDays(hours) {
+    availabilityDays.innerHTML = ""
+
+    weekDays.forEach((label, dayOfWeek) => {
+        const hour = hours.find((item) => item.dayOfWeek === dayOfWeek) ||
+            defaultHours()[dayOfWeek]
+
+        const card = document.createElement("div")
+        card.classList.add("availability-day")
+        card.dataset.day = String(dayOfWeek)
+
+        const head = document.createElement("div")
+        head.classList.add("availability-day-head")
+
+        const strong = document.createElement("strong")
+        strong.textContent = label
+
+        const activeLabel = document.createElement("label")
+        activeLabel.classList.add("admin-checkbox")
+        activeLabel.style.marginBottom = "0"
+
+        const activeInput = document.createElement("input")
+        activeInput.type = "checkbox"
+        activeInput.classList.add("availability-active")
+        activeInput.checked = hour.active
+
+        activeLabel.append(activeInput, document.createTextNode("Aberto"))
+        head.append(strong, activeLabel)
+
+        const fields = document.createElement("div")
+        fields.classList.add("availability-day-fields")
+
+        fields.append(
+            timeField("Abre", "availability-open", hour.opensAt),
+            timeField("Fecha", "availability-close", hour.closesAt),
+            numberField("Intervalo", "availability-interval", hour.slotIntervalMinutes)
+        )
+
+        card.append(head, fields)
+        availabilityDays.appendChild(card)
+    })
+}
+
+function timeField(label, className, value) {
+    const wrap = document.createElement("div")
+    wrap.classList.add("admin-field")
+
+    const labelEl = document.createElement("label")
+    labelEl.textContent = label
+
+    const input = document.createElement("input")
+    input.type = "time"
+    input.classList.add(className)
+    input.value = value
+
+    wrap.append(labelEl, input)
+    return wrap
+}
+
+function numberField(label, className, value) {
+    const wrap = document.createElement("div")
+    wrap.classList.add("admin-field")
+
+    const labelEl = document.createElement("label")
+    labelEl.textContent = label
+
+    const input = document.createElement("input")
+    input.type = "number"
+    input.min = "15"
+    input.step = "15"
+    input.classList.add(className)
+    input.value = value
+
+    wrap.append(labelEl, input)
+    return wrap
+}
+
+function renderBreaks(breaks) {
+    const mondayBreak = breaks.find((item) => item.dayOfWeek >= 1 && item.dayOfWeek <= 5)
+
+    breakActive.checked = Boolean(mondayBreak)
+    breakStart.value = mondayBreak?.startsAt || "12:00"
+    breakEnd.value = mondayBreak?.endsAt || "13:00"
+}
+
+function renderBlockBarberOptions() {
+    blockBarber.innerHTML = ""
+
+    const allOption = document.createElement("option")
+    allOption.value = ""
+    allOption.textContent = "Toda a barbearia"
+    blockBarber.appendChild(allOption)
+
+    barbersCache
+        .filter((barber) => barber.active)
+        .forEach((barber) => {
+            const option = document.createElement("option")
+            option.value = barber.id
+            option.textContent = barber.name
+            blockBarber.appendChild(option)
+        })
+}
+
+function renderBlocks(blocks) {
+    blocksList.innerHTML = ""
+    const activeBlocks = blocks.filter((block) => block.active)
+
+    if (activeBlocks.length === 0) {
+        blocksList.innerHTML = "<li class='empty'>Nenhum bloqueio futuro.</li>"
+        return
+    }
+
+    activeBlocks.forEach((block) => {
+        const item = document.createElement("li")
+        item.classList.add("management-item")
+
+        const info = document.createElement("div")
+        info.classList.add("management-info")
+
+        const title = document.createElement("strong")
+        title.textContent = `${dayjs(block.date).format("DD/MM/YYYY")} - ${block.startsAt} as ${block.endsAt}`
+
+        const barber = barbersCache.find((item) => item.id === block.barberId)
+        const meta = document.createElement("span")
+        meta.textContent = [
+            barber ? barber.name : "Toda a barbearia",
+            block.reason || "",
+        ]
+            .filter(Boolean)
+            .join(" - ")
+
+        info.append(title, meta)
+
+        const actions = document.createElement("div")
+        actions.classList.add("item-actions")
+
+        const deactivateButton = document.createElement("button")
+        deactivateButton.type = "button"
+        deactivateButton.textContent = "Remover"
+        deactivateButton.addEventListener("click", () => deactivateBlock(block))
+
+        actions.append(deactivateButton)
+        item.append(info, actions)
+        blocksList.appendChild(item)
+    })
+}
+
+async function saveAvailability(event) {
+    event.preventDefault()
+
+    const hours = [...document.querySelectorAll(".availability-day")].map((card) => ({
+        dayOfWeek: Number(card.dataset.day),
+        active: card.querySelector(".availability-active").checked,
+        opensAt: card.querySelector(".availability-open").value,
+        closesAt: card.querySelector(".availability-close").value,
+        slotIntervalMinutes: Number(card.querySelector(".availability-interval").value),
+    }))
+
+    const breaks = breakActive.checked
+        ? [1, 2, 3, 4, 5].map((dayOfWeek) => ({
+              dayOfWeek,
+              startsAt: breakStart.value,
+              endsAt: breakEnd.value,
+              active: true,
+          }))
+        : []
+
+    let response
+    try {
+        setSubmitLoading(availabilityForm, true)
+        response = await authFetch("/admin/availability", {
+            method: "PUT",
+            body: JSON.stringify({ hours, breaks }),
+        })
+    } catch (error) {
+        console.log(error)
+        alert("Nao foi possivel salvar os horarios.")
+        return
+    } finally {
+        setSubmitLoading(availabilityForm, false)
+    }
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        return alert(data.error || "Nao foi possivel salvar os horarios.")
+    }
+
+    availabilityCache = await response.json()
+    renderAvailability()
+    alert("Horarios salvos.")
+}
+
+async function saveBlock(event) {
+    event.preventDefault()
+
+    let response
+    try {
+        setSubmitLoading(blockForm, true)
+        response = await authFetch("/admin/availability", {
+            method: "POST",
+            body: JSON.stringify({
+                date: blockDate.value,
+                startsAt: blockStart.value,
+                endsAt: blockEnd.value,
+                barberId: blockBarber.value || null,
+                reason: blockReason.value.trim(),
+            }),
+        })
+    } catch (error) {
+        console.log(error)
+        alert("Nao foi possivel criar o bloqueio.")
+        return
+    } finally {
+        setSubmitLoading(blockForm, false)
+    }
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        return alert(data.error || "Nao foi possivel criar o bloqueio.")
+    }
+
+    blockForm.reset()
+    blockDate.value = dayjs().format("YYYY-MM-DD")
+    availabilityLoaded = false
+    await loadAvailability()
+}
+
+async function deactivateBlock(block) {
+    let response
+    try {
+        response = await authFetch(`/admin/availability/${block.id}`, {
+            method: "PATCH",
+        })
+    } catch (error) {
+        console.log(error)
+        return alert("Nao foi possivel remover o bloqueio.")
+    }
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        return alert(data.error || "Nao foi possivel remover o bloqueio.")
+    }
+
+    availabilityLoaded = false
+    await loadAvailability()
+}
+
 function renderBarbers() {
     barbersList.innerHTML = ""
 
@@ -642,6 +969,13 @@ function resetBarberForm() {
     barberActive.checked = true
 }
 
+function invalidateAvailabilityBarbers() {
+    availabilityLoaded = false
+    if (availabilityCache) {
+        renderBlockBarberOptions()
+    }
+}
+
 async function saveBarber(event) {
     event.preventDefault()
 
@@ -677,6 +1011,7 @@ async function saveBarber(event) {
 
     resetBarberForm()
     await loadBarbers()
+    invalidateAvailabilityBarbers()
 }
 
 async function toggleBarber(barber, active) {
@@ -697,6 +1032,7 @@ async function toggleBarber(barber, active) {
     }
 
     await loadBarbers()
+    invalidateAvailabilityBarbers()
 }
 
 function fillEmptyPeriods() {
@@ -801,11 +1137,14 @@ serviceForm.addEventListener("submit", saveService)
 serviceCancel.addEventListener("click", resetServiceForm)
 barberForm.addEventListener("submit", saveBarber)
 barberCancel.addEventListener("click", resetBarberForm)
+availabilityForm.addEventListener("submit", saveAvailability)
+blockForm.addEventListener("submit", saveBlock)
 
 ;(async () => {
     const allowed = await ensureAdmin()
     if (!allowed) return
 
     selectedDate.value = selectedDay.format("YYYY-MM-DD")
+    blockDate.value = selectedDay.format("YYYY-MM-DD")
     await loadMonth()
 })()

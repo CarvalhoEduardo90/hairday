@@ -3,6 +3,7 @@ const { supabase } = require("../../lib/supabase")
 const { validateAppointmentInput } = require("../../lib/validation")
 const { sendConfirmationEmail } = require("../../lib/email")
 const { sendConfirmationWhatsApp } = require("../../lib/whatsapp")
+const { isSlotAvailable } = require("../../lib/availability")
 
 // /api/appointments
 //   GET  ?date=YYYY-MM-DD&barberId=ID -> lista agendamentos confirmados do dia
@@ -105,6 +106,13 @@ async function create(req, res) {
     })
     if (!valid) {
         return res.status(400).json({ error: validationError })
+    }
+
+    const available = await isSlotAvailable({ when, barberId: barberId || "" })
+    if (!available) {
+        return res
+            .status(409)
+            .json({ error: "Este horario nao esta disponivel. Escolha outro." })
     }
 
     const { data: client, error: clientError } = await supabase

@@ -1,4 +1,4 @@
-import { scheduleFetchByDay } from "../../services/schedule-fetch-by-day.js"
+import { scheduleAvailability } from "../../services/schedule-availability.js"
 import { hoursLoad } from "../form/hours-load.js"
 import { getSelectedBarber, getSelectedService } from "../form/service-select.js"
 
@@ -18,7 +18,7 @@ export async function schedulesDay() {
     }
 
     const barber = getSelectedBarber()
-    const dailySchedules = await scheduleFetchByDay({ date, barberId: barber.id })
+    const availability = await scheduleAvailability({ date, barberId: barber.id })
 
-    hoursLoad({ date, dailySchedules })
+    hoursLoad({ date, availability })
 }

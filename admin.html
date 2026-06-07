@@ -167,6 +167,20 @@
       }
 
       .admin-field input {
+        width: 100%;
+        min-width: 0;
+        height: 2.75rem;
+        border: 1px solid #3e3c41;
+        border-radius: 0.5rem;
+        padding: 0 0.75rem;
+        background: #19181b;
+        color: #f5f4f5;
+        font: inherit;
+      }
+
+      .admin-select {
+        width: 100%;
+        min-width: 0;
         height: 2.75rem;
         border: 1px solid #3e3c41;
         border-radius: 0.5rem;
@@ -246,6 +260,47 @@
       .status-inactive {
         background: #3e3c41;
         color: #b2afb6;
+      }
+
+      .availability-days {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .availability-day {
+        border: 1px solid #3e3c41;
+        border-radius: 0.5rem;
+        padding: 0.85rem;
+        display: grid;
+        gap: 0.75rem;
+      }
+
+      .availability-day-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+      }
+
+      .availability-day-fields {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.5rem;
+      }
+
+      .availability-day-fields .admin-field {
+        margin-bottom: 0;
+      }
+
+      .block-form {
+        border-bottom: 1px solid #2e2c30;
+        margin-bottom: 1.25rem;
+        padding-bottom: 1.25rem;
+      }
+
+      .block-list-title {
+        margin-top: 0.5rem;
       }
 
       .calendar-panel {
@@ -495,6 +550,10 @@
           padding: 0.35rem;
         }
 
+        .availability-day-fields {
+          grid-template-columns: 1fr;
+        }
+
         .calendar-count {
           min-width: 1.25rem;
           height: 1.25rem;
@@ -543,6 +602,9 @@
         </button>
         <button type="button" class="admin-tab" data-view="barbers">
           Barbeiros
+        </button>
+        <button type="button" class="admin-tab" data-view="availability">
+          Horarios
         </button>
       </nav>
 
@@ -731,6 +793,78 @@
           <section class="admin-panel management-list-panel">
             <h2>Barbeiros cadastrados</h2>
             <ul class="management-list" id="barbers-list"></ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="admin-view" id="availability-view" hidden>
+        <div class="management-layout">
+          <form class="admin-panel management-form" id="availability-form">
+            <h2>Horario semanal</h2>
+            <div class="availability-days" id="availability-days"></div>
+
+            <h2>Pausa recorrente</h2>
+            <label class="admin-checkbox">
+              <input type="checkbox" id="break-active" checked />
+              Fechar para almoco de segunda a sexta
+            </label>
+
+            <div class="admin-field">
+              <label for="break-start">Inicio da pausa</label>
+              <input type="time" id="break-start" value="12:00" />
+            </div>
+
+            <div class="admin-field">
+              <label for="break-end">Fim da pausa</label>
+              <input type="time" id="break-end" value="13:00" />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="admin-action admin-action-primary">
+                Salvar horarios
+              </button>
+            </div>
+          </form>
+
+          <section class="admin-panel management-list-panel">
+            <h2>Bloqueio pontual</h2>
+            <form class="block-form" id="block-form">
+              <div class="admin-field">
+                <label for="block-date">Data</label>
+                <input type="date" id="block-date" required />
+              </div>
+
+              <div class="admin-field">
+                <label for="block-start">Inicio</label>
+                <input type="time" id="block-start" required />
+              </div>
+
+              <div class="admin-field">
+                <label for="block-end">Fim</label>
+                <input type="time" id="block-end" required />
+              </div>
+
+              <div class="admin-field">
+                <label for="block-barber">Barbeiro</label>
+                <select id="block-barber" class="admin-select"></select>
+              </div>
+
+              <div class="admin-field">
+                <label for="block-reason">Motivo</label>
+                <input
+                  type="text"
+                  id="block-reason"
+                  placeholder="Ex: consulta, feriado, manutencao"
+                />
+              </div>
+
+              <button type="submit" class="admin-action admin-action-primary">
+                Adicionar bloqueio
+              </button>
+            </form>
+
+            <h2 class="block-list-title">Proximos bloqueios</h2>
+            <ul class="management-list" id="blocks-list"></ul>
           </section>
         </div>
       </section>
