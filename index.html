@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- O CSS da app é injetado em runtime pelo style-loader. Sem isto o
+         browser pinta o fundo branco padrão até o bundle executar. -->
+    <meta name="color-scheme" content="dark" />
+    <style>
+      html {
+        background-color: #19181b;
+        color: #f5f4f5;
+      }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,9 +21,9 @@
       rel="stylesheet"
     />
 
-    <link rel="icon" href="./src/assets/scissors.svg" />
+    <link rel="icon" href="./src/assets/logo.jpg" />
 
-    <title>Hair Day</title>
+    <title>Piquet Barbearia</title>
   </head>
   <body>
     <a
@@ -35,9 +45,9 @@
     >
 
     <div class="container">
-      <img src="./src/assets/logo.svg" alt="Logo" class="logo" />
-
       <form class="form">
+        <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="logo" />
+
         <header>
           <h1>Agende um atendimento</h1>
           <p>
@@ -180,11 +190,11 @@
       </form>
 
       <aside class="showcase">
-        <img src="./src/assets/logo.svg" alt="Hair Day" class="showcase-logo" />
+        <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="showcase-logo" />
 
         <h2 class="showcase-title">Estilo e cuidado em cada corte</h2>
         <p class="showcase-subtitle">
-          Agende seu horário e venha viver a experiência Hair Day.
+          Agende seu horário e venha viver a experiência Piquet Barbearia.
         </p>
 
         <div class="testimonial">

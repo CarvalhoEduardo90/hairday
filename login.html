@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- O CSS da app é injetado em runtime pelo style-loader. Sem isto o
+         browser pinta o fundo branco padrão até o bundle executar. -->
+    <meta name="color-scheme" content="dark" />
+    <style>
+      html {
+        background-color: #19181b;
+        color: #f5f4f5;
+      }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,8 +21,8 @@
       rel="stylesheet"
     />
 
-    <link rel="icon" href="./src/assets/scissors.svg" />
-    <title>Hair Day — Entrar</title>
+    <link rel="icon" href="./src/assets/logo.jpg" />
+    <title>Piquet Barbearia — Entrar</title>
 
     <style>
       /* Botão de voltar ao início. */
@@ -54,7 +64,7 @@
         max-width: 22rem;
       }
       .login-card img.logo-img {
-        height: 2.5rem;
+        height: 3.5rem;
         margin-bottom: 1.5rem;
       }
       .login-card h1 {
@@ -242,7 +252,7 @@
     <div class="auth">
       <section class="auth-form-col">
         <div class="login-card">
-          <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+          <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="logo-img" />
           <h1 id="form-title">Entrar</h1>
           <p class="subtitle" id="form-subtitle">
             Acesse para gerenciar seus agendamentos
@@ -343,7 +353,7 @@
       </section>
 
       <aside class="auth-side">
-        <img src="./src/assets/logo.svg" alt="Hair Day" class="side-logo" />
+        <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="side-logo" />
         <h2>Sua barbearia na palma da mão</h2>
         <p class="side-sub">
           Crie sua conta e tenha o controle dos seus atendimentos.

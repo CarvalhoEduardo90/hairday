@@ -5,8 +5,9 @@
   background-color: #232225;
   border-radius: 0.75rem;
 
-  padding: 5rem;
-  padding-bottom: 1.5rem;
+  /* O topo era 5rem só para abrir espaço para a logo, que flutuava sobre o
+     card. Agora ela está no fluxo, então o respiro vem da própria margem. */
+  padding: 2.5rem 5rem 1.5rem;
 
   display: flex;
   flex-direction: column;
@@ -271,7 +272,7 @@
   .form {
     overflow-y: auto;
     max-width: 100%;
-    /* Reduz o padding lateral no mobile (mantém o topo livre para a logo). */
-    padding: 5rem 1.25rem 1.5rem;
+    /* Reduz o padding lateral no mobile. */
+    padding: 2rem 1.25rem 1.5rem;
   }
 }

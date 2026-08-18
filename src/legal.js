@@ -6,7 +6,7 @@ export const privacyPolicy = {
     title: "Política de Privacidade",
     html: `
         <p>Esta Política descreve como a barbearia trata os dados pessoais dos
-        clientes ao usar o sistema de agendamento Hair Day, em conformidade com a
+        clientes ao usar o sistema de agendamento Piquet Barbearia, em conformidade com a
         Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).</p>
 
         <h3>1. Dados que coletamos</h3>
@@ -49,11 +49,11 @@ export const privacyPolicy = {
 export const termsOfUse = {
     title: "Termos de Uso",
     html: `
-        <p>Ao utilizar o sistema de agendamento Hair Day, você concorda com os
+        <p>Ao utilizar o sistema de agendamento Piquet Barbearia, você concorda com os
         termos abaixo.</p>
 
         <h3>1. O serviço</h3>
-        <p>O Hair Day permite agendar, remarcar e cancelar atendimentos na
+        <p>O Piquet Barbearia permite agendar, remarcar e cancelar atendimentos na
         barbearia, além de gerenciar sua conta e, quando aplicável, sua
         assinatura.</p>
 

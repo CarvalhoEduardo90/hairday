@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- O CSS da app é injetado em runtime pelo style-loader. Sem isto o
+         browser pinta o fundo branco padrão até o bundle executar. -->
+    <meta name="color-scheme" content="dark" />
+    <style>
+      html {
+        background-color: #19181b;
+        color: #f5f4f5;
+      }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,8 +21,8 @@
       rel="stylesheet"
     />
 
-    <link rel="icon" href="./src/assets/scissors.svg" />
-    <title>Hair Day - Criar senha</title>
+    <link rel="icon" href="./src/assets/logo.jpg" />
+    <title>Piquet Barbearia - Criar senha</title>
 
     <style>
       .auth {
@@ -31,7 +41,7 @@
         max-width: 22rem;
       }
       .password-card img.logo-img {
-        height: 2.5rem;
+        height: 3.5rem;
         margin-bottom: 1.5rem;
       }
       .password-card h1 {
@@ -129,7 +139,7 @@
     <div class="auth">
       <section class="auth-form-col">
         <div class="password-card">
-          <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+          <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="logo-img" />
           <h1>Criar senha</h1>
           <p class="subtitle">Defina sua senha para acessar sua conta.</p>
 
@@ -170,8 +180,8 @@
       </section>
 
       <aside class="auth-side">
-        <img src="./src/assets/logo.svg" alt="Hair Day" class="side-logo" />
-        <h2>Sua conta Hair Day</h2>
+        <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="side-logo" />
+        <h2>Sua conta Piquet Barbearia</h2>
         <p class="side-sub">
           Depois de criar sua senha, use seu e-mail para entrar e acompanhar seus
           agendamentos.

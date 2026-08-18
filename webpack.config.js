@@ -18,6 +18,10 @@ if (fs.existsSync(envPath)) {
     });
 }
 
+// Porta em que as functions de api/ são servidas em desenvolvimento.
+// O dev server (3000) encaminha /api para cá — ver devServer.proxy abaixo.
+const DEV_API_PORT = Number(process.env.DEV_API_PORT) || 3001;
+
 module.exports = {
     target: "web",
     mode: "development",
@@ -49,6 +53,20 @@ module.exports = {
                 { from: /^\/criar-senha\/?$/, to: "/criar-senha.html" },
             ],
         },
+
+        // Sem isto o historyApiFallback devolveria o index.html (com status
+        // 200!) para /api/*, e o front quebraria ao tentar parsear HTML.
+        proxy: {
+            "/api": {
+                target: `http://localhost:${DEV_API_PORT}`,
+            },
+        },
+
+        // Sobe as functions de api/ junto com o dev server, num único
+        // `npm run dev`. Só roda em `webpack serve`, nunca no build.
+        onListening() {
+            require("./scripts/dev-api").start(DEV_API_PORT)
+        },
     },
 
     plugins: [
@@ -71,7 +89,7 @@ module.exports = {
             template: path.resolve(__dirname, "index.html"),
             filename: "index.html",
             chunks: ["main"],
-            favicon: path.resolve(__dirname, "src", "assets", "scissors.svg"),
+            favicon: path.resolve(__dirname, "src", "assets", "logo.jpg"),
         }),
 
         new HtmlWebpackPlugin({
