@@ -1,4 +1,4 @@
-# Hair Day — Guia de configuração (Fases 0 e 1)
+# Piquet Barbearia — Guia de configuração (Fases 0 e 1)
 
 Sistema de agendamento de barbearia. Front-end (webpack) + API serverless (Vercel) + banco/auth (Supabase).
 
@@ -47,7 +47,7 @@ mesmas em **Project Settings → Environment Variables**:
 | `ADMIN_EMAILS` | Functions | e-mails admin, separados por vírgula |
 | `API_BASE_URL` | Build (front) | `/api` em produção |
 | `RESEND_API_KEY` | Functions | chave do Resend (e-mails) |
-| `MAIL_FROM` | Functions | remetente verificado, ex: `Hair Day <agenda@seudominio.com>` |
+| `MAIL_FROM` | Functions | remetente verificado, ex: `Piquet Barbearia <agenda@seudominio.com>` |
 | `MAIL_REPLY_TO` *(opcional)* | Functions | e-mail organizador do convite |
 | `SHOP_NAME` *(opcional)* | Functions | nome exibido nos e-mails |
 | `BARBERSHOP_TZ` *(opcional)* | Functions | fuso, padrão `America/Sao_Paulo` |
@@ -69,10 +69,18 @@ mesmas em **Project Settings → Environment Variables**:
 ### 4. Rodar localmente (full-stack)
 ```bash
 npm install
-npm i -g vercel        # uma vez
-vercel dev             # sobe front + /api juntos em http://localhost:3000
+npm run dev            # front + /api em http://localhost:3000
 ```
-> `npm run dev` (webpack) sobe **só o front**, sem a API.
+O `npm run dev` sobe duas peças de uma vez:
+- **webpack-dev-server** (porta 3000) — o front, com live reload;
+- **`scripts/dev-api.js`** (porta 3001) — executa as functions de `api/`, com os
+  rewrites do `vercel.json`. O dev server encaminha `/api` para ele.
+
+Alterações em `api/` e `lib/` valem na requisição seguinte, sem reiniciar.
+Para subir só a API: `npm run dev:api`. Para trocar a porta: `DEV_API_PORT=3002`.
+
+> Se `/api/...` responder HTML em vez de JSON, o front quebra com
+> `Unexpected token '<', "<!DOCTYPE "...`. É o sintoma de a API não estar no ar.
 
 ### 5. Configurar o Resend (e-mails)
 1. Crie uma conta em https://resend.com.
@@ -95,6 +103,47 @@ vercel dev             # sobe front + /api juntos em http://localhost:3000
    - `https://SEU-DOMINIO.com/criar-senha`
    - `http://localhost:3000/**`
    - `http://localhost:5173/**`
+
+### 6b. Perfis de acesso (admin / agendamento / cliente)
+
+Quem pode o quê está numa única tabela: **`lib/permissions.js`**. Os handlers
+nunca comparam papel (`role === "admin"`); eles pedem uma **capacidade**, via
+`requireCapability(req, res, "…")`. Para mudar uma permissão, edite só a matriz.
+
+| Capacidade | admin | agendamento | cliente |
+|---|:---:|:---:|:---:|
+| `booking:read_all` — ver a agenda completa | ✓ | ✓ | |
+| `booking:manage_any` — cancelar/remarcar de qualquer cliente | ✓ | ✓ | |
+| `clients:read` — lista de clientes e histórico | ✓ | ✓ | |
+| `clients:manage` — marcar assinante, enviar convite | ✓ | | |
+| `availability:block_manage` — bloqueios pontuais | ✓ | ✓ | |
+| `availability:hours_manage` — expediente semanal e almoço | ✓ | | |
+| `catalog:manage` — serviços e barbeiros | ✓ | | |
+| `roles:manage` — atribuir perfis | ✓ | | |
+| `users:manage` — criar/editar/excluir contas da equipe | ✓ | | |
+
+Fora da matriz: agendar e consultar horários livres continuam **públicos**; ver e
+cancelar os **próprios** agendamentos vale para qualquer usuário com conta.
+
+**Onde o papel mora:** tabela `public.user_roles` (e-mail → papel). Quem não está
+nela é tratado como `client`. O `ADMIN_EMAILS` **tem precedência** sobre a tabela
+— é o bootstrap que impede você de perder o acesso ao painel.
+
+**Como criar e gerenciar contas da equipe:** aba **Equipe** no painel admin.
+De lá o admin cria a conta (nome, e-mail, senha e perfil — ativa na hora, sem
+depender de e-mail), edita o nome, troca o perfil, define uma senha nova e
+exclui. O e-mail **não** é editável: é a chave que liga a conta ao cliente, ao
+perfil e ao histórico. Excluir remove o acesso, mas preserva o histórico de
+agendamentos (ele pertence ao cliente, não ao login).
+
+Travas que o servidor aplica: ninguém exclui ou rebaixa a própria conta, o
+último administrador não pode ser removido, e contas listadas em `ADMIN_EMAILS`
+não são alteráveis pelo painel (o papel delas não vem do banco).
+
+**Para promover um cliente que já tem conta:** em `/clientes.html`, no seletor ao
+lado de cada cliente (visível só para o admin).
+
+`npm test` roda a verificação da matriz (8 capacidades × 3 papéis).
 
 Convites de clientes sem conta são enviados pelo painel `/clientes.html`. A API
 `POST /api/admin/clients/invite` chama `supabase.auth.admin.inviteUserByEmail`

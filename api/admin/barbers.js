@@ -1,12 +1,12 @@
 const { supabase } = require("../../lib/supabase")
-const { requireAdmin } = require("../../lib/auth")
+const { requireCapability } = require("../../lib/auth")
 
 // /api/admin/barbers         GET -> lista | POST -> cria
 // /api/admin/barbers/:id     PATCH -> atualiza | DELETE -> desativa
 //   (a rota com :id e reescrita para ?id=:id pelo vercel.json)
 module.exports = async function handler(req, res) {
     try {
-        const auth = await requireAdmin(req, res)
+        const auth = await requireCapability(req, res, "catalog:manage")
         if (!auth) return
 
         const id = req.query.id

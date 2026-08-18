@@ -1,6 +1,8 @@
 const { supabase } = require("../../lib/supabase")
-const { requireAdmin } = require("../../lib/auth")
+const { requireCapability } = require("../../lib/auth")
 const { getAccountEmails, categorize } = require("../../lib/accounts")
+const { getRoleByEmail } = require("../../lib/roles")
+const { DEFAULT_ROLE } = require("../../lib/permissions")
 const { isValidEmail } = require("../../lib/validation")
 
 // /api/admin/clients              GET   -> lista clientes com categoria
@@ -8,31 +10,38 @@ const { isValidEmail } = require("../../lib/validation")
 // /api/admin/clients/invite       POST  -> envia convite Supabase Auth { clientId }
 //   (as rotas com sufixo sao reescritas para ?id=:id pelo vercel.json;
 //    "invite" e tratado como caso especial — ids de cliente sao UUIDs.)
+// Cada rota declara os metodos que aceita e a capacidade que exige.
+// Ler a lista serve ao perfil "agendamento"; convidar e marcar assinante
+// continuam restritos a quem gerencia clientes.
+function resolveRoute(id) {
+    if (id === "invite") {
+        return { methods: ["POST"], capability: "clients:manage", run: invite }
+    }
+
+    if (id) {
+        return {
+            methods: ["PATCH"],
+            capability: "clients:manage",
+            run: (req, res) => updateSubscriber(req, res, id),
+        }
+    }
+
+    return { methods: ["GET"], capability: "clients:read", run: list }
+}
+
 module.exports = async function handler(req, res) {
     try {
-        const auth = await requireAdmin(req, res)
-        if (!auth) return
+        const route = resolveRoute(req.query.id)
 
-        const id = req.query.id
-
-        if (id === "invite") {
-            if (req.method === "POST") return await invite(req, res)
-
-            res.setHeader("Allow", "POST")
-            return res.status(405).json({ error: "Metodo nao permitido." })
-        }
-
-        if (id) {
-            if (req.method === "PATCH") return await updateSubscriber(req, res, id)
-
-            res.setHeader("Allow", "PATCH")
+        if (!route.methods.includes(req.method)) {
+            res.setHeader("Allow", route.methods.join(", "))
             return res.status(405).json({ error: "Método não permitido." })
         }
 
-        if (req.method === "GET") return await list(req, res)
+        const auth = await requireCapability(req, res, route.capability)
+        if (!auth) return
 
-        res.setHeader("Allow", "GET")
-        return res.status(405).json({ error: "Método não permitido." })
+        return await route.run(req, res)
     } catch (error) {
         console.error(error)
         return res.status(500).json({ error: "Erro interno no servidor." })
@@ -50,17 +59,25 @@ async function list(req, res) {
         return res.status(500).json({ error: "Erro ao buscar clientes." })
     }
 
-    const accountEmails = await getAccountEmails()
+    const [accountEmails, roleByEmail] = await Promise.all([
+        getAccountEmails(),
+        getRoleByEmail(),
+    ])
 
-    const clients = data.map((c) => ({
-        id: c.id,
-        name: c.full_name,
-        email: c.email,
-        phone: c.phone,
-        isSubscriber: c.is_subscriber,
-        hasAccount: accountEmails.has((c.email || "").toLowerCase()),
-        category: categorize(c, accountEmails),
-    }))
+    const clients = data.map((c) => {
+        const email = (c.email || "").toLowerCase()
+
+        return {
+            id: c.id,
+            name: c.full_name,
+            email: c.email,
+            phone: c.phone,
+            isSubscriber: c.is_subscriber,
+            hasAccount: accountEmails.has(email),
+            category: categorize(c, accountEmails),
+            role: roleByEmail.get(email) || DEFAULT_ROLE,
+        }
+    })
 
     return res.status(200).json(clients)
 }

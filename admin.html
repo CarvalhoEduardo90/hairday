@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- O CSS da app é injetado em runtime pelo style-loader. Sem isto o
+         browser pinta o fundo branco padrão até o bundle executar. -->
+    <meta name="color-scheme" content="dark" />
+    <style>
+      html {
+        background-color: #19181b;
+        color: #f5f4f5;
+      }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,8 +21,8 @@
       rel="stylesheet"
     />
 
-    <link rel="icon" href="./src/assets/scissors.svg" />
-    <title>Hair Day - Painel</title>
+    <link rel="icon" href="./src/assets/logo.jpg" />
+    <title>Piquet Barbearia - Painel</title>
 
     <style>
       .admin {
@@ -34,7 +44,7 @@
       }
 
       .admin-top img.logo-img {
-        height: 2.5rem;
+        height: 3.5rem;
       }
 
       .admin-nav,
@@ -130,6 +140,28 @@
 
       .admin-view[hidden] {
         display: none;
+      }
+
+      .field-hint {
+        color: #98959d;
+        font-size: 0.78rem;
+      }
+
+      /* Etiqueta de perfil na lista da equipe. */
+      .role-badge {
+        border-radius: 999px;
+        padding: 0.15rem 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .role-admin {
+        background: #b8952e;
+        color: #19181b;
+      }
+      .role-scheduler {
+        background: #243b53;
+        color: #9ec5ff;
       }
 
       .admin-action[hidden] {
@@ -565,9 +597,14 @@
   <body>
     <main class="admin">
       <div class="admin-top">
-        <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+        <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="logo-img" />
         <div class="admin-nav">
           <a href="clientes.html" class="admin-logout">Clientes</a>
+          <!-- Equipe abre uma view desta mesma pagina (data-view), mas fica
+               aqui em cima ao lado de Clientes, e nao na barra de abas. -->
+          <button type="button" class="admin-logout" data-view="team">
+            Equipe
+          </button>
           <button id="logout" class="admin-logout">Sair</button>
         </div>
       </div>
@@ -865,6 +902,69 @@
 
             <h2 class="block-list-title">Proximos bloqueios</h2>
             <ul class="management-list" id="blocks-list"></ul>
+          </section>
+        </div>
+      </section>
+
+      <section class="admin-view" id="team-view" hidden>
+        <div class="management-layout">
+          <section class="admin-panel management-form">
+            <h2 id="team-form-title">Nova conta</h2>
+
+            <form id="team-form">
+              <input type="hidden" id="team-id" />
+
+              <div class="admin-field">
+                <label for="team-name">Nome</label>
+                <input type="text" id="team-name" placeholder="Nome completo" />
+              </div>
+
+              <div class="admin-field">
+                <label for="team-email">E-mail</label>
+                <input
+                  type="email"
+                  id="team-email"
+                  placeholder="email@exemplo.com"
+                  autocomplete="off"
+                />
+              </div>
+
+              <div class="admin-field">
+                <label for="team-password">Senha</label>
+                <input
+                  type="password"
+                  id="team-password"
+                  placeholder="Minimo 6 caracteres"
+                  autocomplete="new-password"
+                  minlength="6"
+                />
+                <span class="field-hint" id="team-password-hint">
+                  Informe a senha ao funcionario. Ela vale imediatamente.
+                </span>
+              </div>
+
+              <div class="admin-field">
+                <label for="team-role">Perfil</label>
+                <select id="team-role" class="admin-select">
+                  <option value="scheduler">Agendamento</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="admin-action admin-action-primary">
+                  Salvar
+                </button>
+                <button type="button" class="admin-action" id="team-cancel" hidden>
+                  Cancelar
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="admin-panel management-list-panel">
+            <h2>Contas com acesso ao painel</h2>
+            <ul class="management-list" id="team-list"></ul>
           </section>
         </div>
       </section>

@@ -5,7 +5,8 @@
   "scripts": {
     "build": "webpack",
     "dev": "webpack serve",
-    "dev:api": "vercel dev"
+    "dev:api": "node scripts/dev-api.js",
+    "test": "node scripts/test-permissions.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

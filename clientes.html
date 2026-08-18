@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    <!-- O CSS da app é injetado em runtime pelo style-loader. Sem isto o
+         browser pinta o fundo branco padrão até o bundle executar. -->
+    <meta name="color-scheme" content="dark" />
+    <style>
+      html {
+        background-color: #19181b;
+        color: #f5f4f5;
+      }
+    </style>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -11,8 +21,8 @@
       rel="stylesheet"
     />
 
-    <link rel="icon" href="./src/assets/scissors.svg" />
-    <title>Hair Day — Clientes</title>
+    <link rel="icon" href="./src/assets/logo.jpg" />
+    <title>Piquet Barbearia — Clientes</title>
 
     <style>
       .admin {
@@ -27,7 +37,7 @@
         margin-bottom: 2rem;
       }
       .admin-top img.logo-img {
-        height: 2.5rem;
+        height: 3.5rem;
       }
       .admin-nav {
         display: flex;
@@ -131,6 +141,23 @@
       .client-action {
         display: flex;
         gap: 0.5rem;
+        align-items: center;
+      }
+
+      /* Seletor de perfil de acesso (só aparece para o admin). */
+      .role-select {
+        background: #19181b;
+        border: 1px solid #2e2c30;
+        color: #f5f4f5;
+        border-radius: 0.5rem;
+        padding: 0.5rem 0.6rem;
+        font-family: inherit;
+        font-size: 0.82rem;
+        cursor: pointer;
+      }
+      .role-select:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       /* Status (usado no histórico). */
@@ -223,7 +250,7 @@
   <body>
     <main class="admin">
       <div class="admin-top">
-        <img src="./src/assets/logo.svg" alt="Hair Day" class="logo-img" />
+        <img src="./src/assets/logo.png" alt="Piquet Barbearia" class="logo-img" />
         <div class="admin-nav">
           <a href="admin.html" class="admin-logout">Agendamentos</a>
           <button id="logout" class="admin-logout">Sair</button>

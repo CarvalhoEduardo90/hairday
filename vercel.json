@@ -28,6 +28,10 @@
     {
       "source": "/api/admin/clients/:id",
       "destination": "/api/admin/clients?id=:id"
+    },
+    {
+      "source": "/api/admin/users/:id",
+      "destination": "/api/admin/users?id=:id"
     }
   ],
   "functions": {

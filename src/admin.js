@@ -6,8 +6,8 @@ import "./styles/form.css"
 import "./styles/schedule.css"
 
 import dayjs from "dayjs"
-import { supabase, getAccessToken } from "./libs/supabase-client.js"
-import { apiConfig } from "./services/api-config.js"
+import { supabase } from "./libs/supabase-client.js"
+import { authFetch, requireCapability, can } from "./modules/session.js"
 
 const selectedDate = document.getElementById("date")
 const logoutButton = document.getElementById("logout")
@@ -26,13 +26,26 @@ const monthCount = document.getElementById("month-count")
 const dayRevenue = document.getElementById("day-revenue")
 const adminTitle = document.getElementById("admin-title")
 const adminSubtitle = document.getElementById("admin-subtitle")
-const tabs = document.querySelectorAll(".admin-tab")
+// Todo botao que troca de view, esteja ele na barra de abas ou na barra
+// superior (o caso do "Equipe", que fica ao lado de "Clientes").
+const tabs = document.querySelectorAll("[data-view]")
 const views = {
     agenda: document.getElementById("agenda-view"),
     services: document.getElementById("services-view"),
     barbers: document.getElementById("barbers-view"),
     availability: document.getElementById("availability-view"),
+    team: document.getElementById("team-view"),
 }
+const teamForm = document.getElementById("team-form")
+const teamFormTitle = document.getElementById("team-form-title")
+const teamId = document.getElementById("team-id")
+const teamName = document.getElementById("team-name")
+const teamEmail = document.getElementById("team-email")
+const teamPassword = document.getElementById("team-password")
+const teamPasswordHint = document.getElementById("team-password-hint")
+const teamRole = document.getElementById("team-role")
+const teamCancel = document.getElementById("team-cancel")
+const teamList = document.getElementById("team-list")
 const serviceForm = document.getElementById("service-form")
 const serviceFormTitle = document.getElementById("service-form-title")
 const serviceId = document.getElementById("service-id")
@@ -69,6 +82,8 @@ let monthSchedules = []
 let loadRequestId = 0
 let servicesLoaded = false
 let barbersLoaded = false
+let teamLoaded = false
+let teamCache = []
 let availabilityLoaded = false
 let servicesCache = []
 let barbersCache = []
@@ -98,6 +113,10 @@ const viewCopy = {
     availability: {
         title: "Horarios",
         subtitle: "Configure expediente, almoco e bloqueios pontuais da agenda.",
+    },
+    team: {
+        title: "Equipe",
+        subtitle: "Contas com acesso ao painel: crie, edite, troque a senha ou remova.",
     },
 }
 
@@ -151,39 +170,39 @@ function formatMonth(date) {
     }).format(dayjs(date).toDate())
 }
 
-async function authFetch(path, options = {}) {
-    const token = await getAccessToken()
-    return fetch(`${apiConfig.baseURL}${path}`, {
-        ...options,
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            ...(options.headers || {}),
-        },
-    })
+// Sessão do usuário logado ({ email, role, capabilities }), preenchida por
+// ensureAccess() antes de qualquer carregamento de dados.
+let session = null
+
+// Entra quem consegue ver a agenda: admin e o perfil "agendamento".
+// As áreas restritas são escondidas em applyCapabilities().
+async function ensureAccess() {
+    session = await requireCapability("booking:read_all")
+    if (!session) return false
+
+    applyCapabilities()
+    return true
 }
 
-async function ensureAdmin() {
-    const token = await getAccessToken()
-    if (!token) {
-        window.location.href = "login.html"
-        return false
+// Esconde o que este papel não pode usar. É só UX: cada endpoint volta a
+// checar a permissão no servidor.
+function applyCapabilities() {
+    // Abas que exigem uma capacidade para aparecer.
+    const capabilityByTab = {
+        services: "catalog:manage",
+        barbers: "catalog:manage",
+        team: "users:manage",
     }
 
-    const response = await authFetch("/me")
-    if (!response.ok) {
-        window.location.href = "login.html"
-        return false
-    }
+    tabs.forEach((tab) => {
+        const required = capabilityByTab[tab.dataset.view]
+        tab.hidden = Boolean(required) && !can(session, required)
+    })
 
-    const me = await response.json()
-    if (!me.isAdmin) {
-        alert("Acesso restrito ao administrador.")
-        await supabase.auth.signOut()
-        window.location.href = "login.html"
-        return false
+    // Aba Horários: bloqueios pontuais ficam; expediente semanal é do admin.
+    if (!can(session, "availability:hours_manage")) {
+        availabilityForm.hidden = true
     }
-    return true
 }
 
 async function loadMonth() {
@@ -423,6 +442,9 @@ function switchView(name) {
     if (name === "barbers" && !barbersLoaded) {
         loadBarbers()
     }
+    if (name === "team" && !teamLoaded) {
+        loadTeam()
+    }
     if (name === "availability" && !availabilityLoaded) {
         loadAvailability()
     }
@@ -609,6 +631,162 @@ async function loadBarbers() {
         barbersList.innerHTML =
             "<li class='empty'>Nao foi possivel carregar os barbeiros.</li>"
     }
+}
+
+// ===== Equipe (contas com acesso ao painel) =====
+
+const TEAM_ROLE_LABELS = { admin: "Admin", scheduler: "Agendamento" }
+
+async function loadTeam() {
+    teamList.innerHTML = "<li class='empty'>Carregando contas...</li>"
+
+    try {
+        const response = await authFetch("/admin/users")
+        if (!response.ok) {
+            teamList.innerHTML =
+                "<li class='empty'>Nao foi possivel carregar as contas.</li>"
+            return
+        }
+
+        teamLoaded = true
+        teamCache = await response.json()
+        renderTeam()
+    } catch (error) {
+        console.log(error)
+        teamList.innerHTML = "<li class='empty'>Nao foi possivel carregar as contas.</li>"
+    }
+}
+
+function renderTeam() {
+    teamList.innerHTML = ""
+
+    if (teamCache.length === 0) {
+        teamList.innerHTML = "<li class='empty'>Nenhuma conta com acesso ao painel.</li>"
+        return
+    }
+
+    teamCache.forEach((member) => {
+        const item = document.createElement("li")
+        item.classList.add("management-item")
+
+        const info = document.createElement("div")
+        info.classList.add("management-info")
+        const name = document.createElement("strong")
+        name.textContent = member.name || "(sem nome)"
+        const email = document.createElement("span")
+        email.textContent = member.email
+        info.append(name, email)
+
+        const badge = document.createElement("span")
+        badge.classList.add("role-badge", `role-${member.role}`)
+        badge.textContent = TEAM_ROLE_LABELS[member.role] || member.role
+
+        const actions = document.createElement("div")
+        actions.classList.add("form-actions")
+
+        const editButton = document.createElement("button")
+        editButton.type = "button"
+        editButton.classList.add("admin-action")
+        editButton.textContent = "Editar"
+        editButton.addEventListener("click", () => editTeamMember(member))
+
+        actions.append(editButton)
+
+        // Conta do ADMIN_EMAILS e a propria conta nao podem ser excluidas —
+        // a API tambem recusa; aqui so evitamos oferecer a acao.
+        if (!member.locked && member.email !== session.email) {
+            const removeButton = document.createElement("button")
+            removeButton.type = "button"
+            removeButton.classList.add("admin-action")
+            removeButton.textContent = "Excluir"
+            removeButton.addEventListener("click", () => removeTeamMember(member))
+            actions.append(removeButton)
+        }
+
+        item.append(info, badge, actions)
+        teamList.appendChild(item)
+    })
+}
+
+// Passa o formulario para o modo edicao: e-mail fica travado (e a chave que
+// liga a conta ao cliente e ao perfil) e a senha vira opcional.
+function editTeamMember(member) {
+    teamFormTitle.textContent = "Editar conta"
+    teamId.value = member.id
+    teamName.value = member.name
+    teamEmail.value = member.email
+    teamEmail.disabled = true
+    teamPassword.value = ""
+    teamPasswordHint.textContent =
+        "Deixe em branco para manter a senha atual, ou digite uma nova."
+    teamRole.value = member.role
+    teamRole.disabled = member.locked || member.email === session.email
+    teamCancel.hidden = false
+}
+
+function resetTeamForm() {
+    teamFormTitle.textContent = "Nova conta"
+    teamForm.reset()
+    teamId.value = ""
+    teamEmail.disabled = false
+    teamRole.disabled = false
+    teamPasswordHint.textContent =
+        "Informe a senha ao funcionario. Ela vale imediatamente."
+    teamCancel.hidden = true
+}
+
+async function saveTeamMember(event) {
+    event.preventDefault()
+
+    const editingId = teamId.value
+    const password = teamPassword.value
+
+    const payload = editingId
+        ? { name: teamName.value.trim(), role: teamRole.value }
+        : {
+              name: teamName.value.trim(),
+              email: teamEmail.value.trim(),
+              password,
+              role: teamRole.value,
+          }
+
+    // Na edicao a senha so vai junto quando o admin digitou uma nova.
+    if (editingId && password) payload.password = password
+
+    const response = await authFetch(
+        editingId ? `/admin/users/${editingId}` : "/admin/users",
+        {
+            method: editingId ? "PATCH" : "POST",
+            body: JSON.stringify(payload),
+        }
+    )
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        alert(data.error || "Nao foi possivel salvar a conta.")
+        return
+    }
+
+    resetTeamForm()
+    await loadTeam()
+}
+
+async function removeTeamMember(member) {
+    const confirmed = confirm(
+        `Excluir a conta de ${member.name || member.email}?\n\n` +
+            "A pessoa perde o acesso ao sistema. O historico de agendamentos dela e mantido."
+    )
+    if (!confirmed) return
+
+    const response = await authFetch(`/admin/users/${member.id}`, { method: "DELETE" })
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        alert(data.error || "Nao foi possivel excluir a conta.")
+        return
+    }
+
+    await loadTeam()
 }
 
 async function loadAvailability() {
@@ -1144,9 +1322,11 @@ barberForm.addEventListener("submit", saveBarber)
 barberCancel.addEventListener("click", resetBarberForm)
 availabilityForm.addEventListener("submit", saveAvailability)
 blockForm.addEventListener("submit", saveBlock)
+teamForm.addEventListener("submit", saveTeamMember)
+teamCancel.addEventListener("click", resetTeamForm)
 
 ;(async () => {
-    const allowed = await ensureAdmin()
+    const allowed = await ensureAccess()
     if (!allowed) return
 
     selectedDate.value = selectedDay.format("YYYY-MM-DD")

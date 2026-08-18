@@ -1,29 +1,41 @@
 const { supabase } = require("../../lib/supabase")
-const { requireAdmin } = require("../../lib/auth")
+const { requireCapability } = require("../../lib/auth")
+
+// Cada operacao exige a sua capacidade: o perfil "agendamento" cria e remove
+// bloqueios pontuais, mas so o admin altera o expediente semanal e o almoco.
+const CAPABILITY_BY_METHOD = {
+    GET: "availability:block_manage",
+    POST: "availability:block_manage",
+    PATCH: "availability:block_manage",
+    PUT: "availability:hours_manage",
+}
 
 // /api/admin/availability        GET -> config | PUT -> salva semana | POST -> bloqueio
 // /api/admin/availability/:id    PATCH -> desativa bloqueio
 //   (a rota com :id e reescrita para ?id=:id pelo vercel.json)
 module.exports = async function handler(req, res) {
     try {
-        const auth = await requireAdmin(req, res)
-        if (!auth) return
-
         const id = req.query.id
 
-        if (id) {
-            if (req.method === "PATCH") return await disableBlock(req, res, id)
-
-            res.setHeader("Allow", "PATCH")
+        // O conjunto de metodos validos depende da rota (com ou sem :id).
+        const allowed = id ? ["PATCH"] : ["GET", "PUT", "POST"]
+        if (!allowed.includes(req.method)) {
+            res.setHeader("Allow", allowed.join(", "))
             return res.status(405).json({ error: "Metodo nao permitido." })
         }
 
+        const auth = await requireCapability(
+            req,
+            res,
+            CAPABILITY_BY_METHOD[req.method]
+        )
+        if (!auth) return
+
+        if (id) return await disableBlock(req, res, id)
+
         if (req.method === "GET") return await getConfig(req, res)
         if (req.method === "PUT") return await saveWeeklyConfig(req, res)
-        if (req.method === "POST") return await createBlock(req, res)
-
-        res.setHeader("Allow", "GET, PUT, POST")
-        return res.status(405).json({ error: "Metodo nao permitido." })
+        return await createBlock(req, res)
     } catch (error) {
         console.error(error)
         return res.status(500).json({ error: "Erro interno no servidor." })

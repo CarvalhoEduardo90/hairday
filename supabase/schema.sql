@@ -240,3 +240,19 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- ============================================================
+-- Perfis de acesso (admin / scheduler / client).
+-- O vinculo e por e-mail, igual ao resto do sistema.
+-- Quem nao estiver aqui e tratado como 'client'.
+-- ADMIN_EMAILS (variavel de ambiente) tem precedencia sobre esta tabela:
+-- e o bootstrap que garante acesso ao painel mesmo com a tabela vazia.
+-- ============================================================
+create table if not exists public.user_roles (
+  email      text primary key,
+  role       text not null default 'client'
+             check (role in ('admin', 'scheduler', 'client')),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_roles enable row level security;

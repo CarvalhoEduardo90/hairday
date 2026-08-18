@@ -1,5 +1,5 @@
 const { supabase } = require("../../lib/supabase")
-const { requireAdmin } = require("../../lib/auth")
+const { requireCapability } = require("../../lib/auth")
 
 // /api/admin/client-history?clientId=<uuid>
 //   GET (admin) -> TODOS os agendamentos de um cliente (confirmados e
@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
             return res.status(405).json({ error: "Método não permitido." })
         }
 
-        const auth = await requireAdmin(req, res)
+        const auth = await requireCapability(req, res, "clients:read")
         if (!auth) return
 
         const { clientId } = req.query

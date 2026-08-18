@@ -1,6 +1,6 @@
 const dayjs = require("dayjs")
 const { supabase } = require("../../lib/supabase")
-const { requireAdmin } = require("../../lib/auth")
+const { requireCapability } = require("../../lib/auth")
 const { getAccountEmails, categorize } = require("../../lib/accounts")
 
 module.exports = async function handler(req, res) {
@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
             return res.status(405).json({ error: "Metodo nao permitido." })
         }
 
-        const auth = await requireAdmin(req, res)
+        const auth = await requireCapability(req, res, "booking:read_all")
         if (!auth) return
 
         const { start, end, error: dateError } = getDateRange(req.query)

@@ -4,8 +4,8 @@ import "./libs/dayjs.js"
 import "./styles/global.css"
 import "./styles/form.css"
 
-import { supabase, getAccessToken } from "./libs/supabase-client.js"
-import { apiConfig } from "./services/api-config.js"
+import { supabase } from "./libs/supabase-client.js"
+import { loadSession, can } from "./modules/session.js"
 import { isValidEmail, isValidPhone } from "./utils/validation.js"
 import { privacyPolicy, termsOfUse } from "./legal.js"
 
@@ -99,17 +99,14 @@ document.addEventListener("keydown", (event) => {
 })
 
 // Consulta o papel do usuário e redireciona de acordo.
+// Admin e "agendamento" caem no painel; cliente vai para a própria conta.
 async function redirectByRole() {
-    const token = await getAccessToken()
-    if (!token) return
+    const session = await loadSession()
+    if (!session) return
 
-    const response = await fetch(`${apiConfig.baseURL}/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-    })
-    if (!response.ok) return
-
-    const me = await response.json()
-    window.location.href = me.isAdmin ? "admin.html" : "minha-conta.html"
+    window.location.href = can(session, "booking:read_all")
+        ? "admin.html"
+        : "minha-conta.html"
 }
 
 // Se já houver sessão ativa, redireciona direto.

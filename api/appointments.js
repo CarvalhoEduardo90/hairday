@@ -1,6 +1,7 @@
 const dayjs = require("dayjs")
 const { supabase } = require("../lib/supabase")
 const { requireAuth } = require("../lib/auth")
+const { can } = require("../lib/permissions")
 const { validateAppointmentInput } = require("../lib/validation")
 const {
     sendConfirmationEmail,
@@ -309,7 +310,7 @@ async function loadAuthorized(req, res, id) {
     }
 
     const ownerEmail = (appointment.clients?.email || "").toLowerCase()
-    if (!auth.isAdmin && ownerEmail !== auth.email) {
+    if (!can(auth, "booking:manage_any") && ownerEmail !== auth.email) {
         res.status(403).json({ error: "Você não pode gerenciar este agendamento." })
         return null
     }
